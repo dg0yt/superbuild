@@ -1,0 +1,12 @@
+{
+  "name": "base-files",
+  "version-string": "11",
+  "port-version": 0,
+  "description": "Debian base system miscellaneous files",
+  "homepage": "https://tracker.debian.org/pkg/base-files",
+  "maintainers": "Kai Pastor <dg0yt@darc.de>",
+  "supports": "!windows",
+  "dependencies": [
+    { "name": "dpkg-source-util", "host": true }
+  ]
+}

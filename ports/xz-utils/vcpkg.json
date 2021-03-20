@@ -1,0 +1,12 @@
+{
+  "name": "xz-utils",
+  "version-string": "5.2.4",
+  "port-version": 0,
+  "homepage": "",
+  "description": "",
+  "supports": "!windows",
+  "dependencies": [
+   { "name": "dpkg-source-util", "host": true },
+   { "name": "libiconv" }
+  ]
+}

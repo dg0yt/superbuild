@@ -1,0 +1,46 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: OpenOrienteering Superbuild
+Upstream-Contact: dg0y@darc.de
+Source: https://github.com/dg0yt/superbuild
+Comment:
+ The OpenOrienteering Superbuild project explicitly makes use of files
+ provided by the Debian project. In particular, this repository contains
+ .dsc files taken unmodified from Debian servers.  Unless explicitly stated,
+ the maintainers and uploaders listed in these files are not involved in
+ OpenOrienteering Superbuild.
+
+Files: *
+Copyright: 2021 Kai Pastor
+License: MIT
+
+Files: ports/*/*.dsc
+Copyright: Unspecified
+License: Unspecified
+Comment:
+ Being generated and distribued by the Debian project, these file can be
+ assumed to be DFSG-free in a Debian sense. Each .dsc files is generated
+ during the build of a Debian source package and available from Debian
+ servers. It lists maintainers and uploaders for this package in Debian.
+ Unless explicitly stated, these persons are not involved in the vcpkg port.
+ Most content in a .dsc file is derived from the debian/control file which
+ is part of the package's .debian tarball. This tarball also holds a
+ debian/copyright file.
+
+License: MIT
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to
+ deal in the Software without restriction, including without limitation the
+ rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ IN THE SOFTWARE.

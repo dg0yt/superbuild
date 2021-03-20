@@ -1,0 +1,11 @@
+{
+  "name": "cmake-build-install-strip",
+  "version-date": "2021-03-20",
+  "port-version": 0,
+  "description": "CMake support scripts for VCPKG",
+  "homepage": "https://github.com/OpenOrienteering/superbuild",
+  "maintainers": "Kai Pastor <dg0yt@darc.de>",
+  "dependencies": [
+    { "name": "vcpkg-cmake", "host": true }
+  ]
+}

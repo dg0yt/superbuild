@@ -1,0 +1,14 @@
+{
+  "name": "zlib",
+  "version-string": "1.12.11",
+  "port-version": 0,
+  "description": "Compression library",
+  "homepage": "http://zlib.net/",
+  "maintainers": "Kai Pastor <dg0yt@darc.de>",
+  "supports": "!windows",
+  "dependencies": [
+    { "name": "cmake-build-install-strip", "host": true },
+    { "name": "dpkg-source-util", "host": true },
+    { "name": "vcpkg-cmake", "host": true }
+  ]
+}

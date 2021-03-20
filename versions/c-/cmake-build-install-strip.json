@@ -1,0 +1,9 @@
+{
+  "versions": [
+    {
+      "version-date": "2021-03-20",
+      "port-version": 0,
+	  "path": "$/ports/cmake-build-install-strip"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "versions" : [
+    {
+      "version-string": "1.12.11",
+      "port-version": 0,
+      "path": "$/ports/zlib"
+    }
+  ]
+}
