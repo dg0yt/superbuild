@@ -1,0 +1,44 @@
+From 85f7b07c37971a28f94ed2d25df318dce951acdf Mon Sep 17 00:00:00 2001
+From: Kai Pastor <dg0yt@darc.de>
+Date: Wed, 17 Mar 2021 08:24:01 +0100
+Subject: [PATCH] Choose MinGW triplets when building vcpkg with MinGW
+
+---
+ src/vcpkg/triplet.cpp | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/src/vcpkg/triplet.cpp b/src/vcpkg/triplet.cpp
+index 24a1f81..fdf64e2 100644
+--- a/src/vcpkg/triplet.cpp
++++ b/src/vcpkg/triplet.cpp
+@@ -75,7 +75,17 @@ namespace vcpkg
+ 
+     static Triplet system_triplet()
+     {
+-#if defined(_WIN32)
++#if defined(__MINGW32__)
++        auto host_proc = System::get_host_processor();
++        switch (host_proc)
++        {
++            case System::CPUArchitecture::X86: return Triplet::from_canonical_name("x86-mingw-dynamic");
++            case System::CPUArchitecture::X64: return Triplet::from_canonical_name("x64-mingw-dynamic");
++            case System::CPUArchitecture::ARM: return Triplet::from_canonical_name("arm-mingw-dynamic");
++            case System::CPUArchitecture::ARM64: return Triplet::from_canonical_name("arm64-mingw-dynamic");
++            default: return Triplet::from_canonical_name("x86-mingw-dynamic");
++        }
++#elif defined(_WIN32)
+         auto host_proc = System::get_host_processor();
+         switch (host_proc)
+         {
+@@ -115,7 +125,7 @@ namespace vcpkg
+         {
+             return Triplet::from_canonical_name(std::string(*args.triplet));
+         }
+-#if defined(_WIN32)
++#if defined(_WIN32) && !defined(__MINGW32__)
+         return Triplet::from_canonical_name("x86-windows");
+ #else
+         return system_triplet();
+-- 
+2.17.1
+

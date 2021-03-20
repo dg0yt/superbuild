@@ -1,0 +1,32 @@
+From 97aef1e1ee962b879cbbafb31c103c51fca69395 Mon Sep 17 00:00:00 2001
+From: Kai Pastor <dg0yt@darc.de>
+Date: Fri, 19 Mar 2021 20:43:30 +0100
+Subject: [PATCH] Use only named packages from extra registries
+
+This change prevents errors from RegistryEntry::get_path_to_version()
+when the default registry doesn't have a port for a name which is
+part of some extra registry but not listed that registry's "packages"
+configuration field.
+This is consistent with RegistrySet::registry_for_port() which only
+considers the the named packages from the extra registries.
+---
+ src/vcpkg/paragraphs.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/vcpkg/paragraphs.cpp b/src/vcpkg/paragraphs.cpp
+index 4b46219..6101463 100644
+--- a/src/vcpkg/paragraphs.cpp
++++ b/src/vcpkg/paragraphs.cpp
+@@ -426,7 +426,8 @@ namespace vcpkg::Paragraphs
+ 
+         for (const auto& registry : registries.registries())
+         {
+-            registry.implementation().get_all_port_names(ports, paths);
++            const auto packages = registry.packages();
++            ports.insert(end(ports), begin(packages), end(packages));
+         }
+         if (auto registry = registries.default_registry())
+         {
+-- 
+2.17.1
+
