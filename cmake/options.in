@@ -1,0 +1,4 @@
+--downloads-root=@OUTPUT_DIR@/downloads
+--x-buildtrees-root=@OUTPUT_DIR@/buildtrees
+--x-packages-root=@OUTPUT_DIR@/packages
+--x-install-root=@OUTPUT_DIR@/installed

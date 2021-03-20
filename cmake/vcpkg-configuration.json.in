@@ -1,0 +1,19 @@
+{
+  "@KIND_FILE@default-registry": {
+    "kind": "filesystem",
+    "path": "@DPKG_PORTS_PATH@"
+  },
+  "@KIND_GIT@default-registry": {
+	"kind": "git",
+	"baseline": "@SOURCE_HEAD@",
+	"repository": "@SOURCE_DIR@/.."
+  },
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "@VCPKG_ROOT@",
+      "baseline": "@VCPKG_HEAD@",
+      "packages": [ "vcpkg-cmake", "vcpkg-cmake-config", "libiconv" ]
+    }
+  ]
+}

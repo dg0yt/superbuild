@@ -1,0 +1,54 @@
+set(SOURCE_DIR      "@CMAKE_CURRENT_SOURCE_DIR@")
+set(OUTPUT_DIR      "@CMAKE_CURRENT_BINARY_DIR@")
+set(DPKG_PORTS_PATH "@DPKG_PORTS_PATH@")
+set(VCPKG_ROOT      "@VCPKG_ROOT@")
+set(GIT_EXECUTABLE  "@GIT_EXECUTABLE@")
+
+execute_process(
+  COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+  WORKING_DIRECTORY "${VCPKG_ROOT}"
+  OUTPUT_VARIABLE VCPKG_HEAD
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE result
+)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Failed to retrieve vcpkg HEAD revision SHA-1.")
+endif()
+
+execute_process(
+  COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+  WORKING_DIRECTORY "${SOURCE_DIR}/.."
+  OUTPUT_VARIABLE SOURCE_HEAD
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE result
+)
+if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Failed to retrieve vcpkg HEAD revision SHA-1.")
+endif()
+
+set(KIND_FILE "")
+set(KIND_GIT [[$disabled-]])
+set(KIND_FILE [[$disabled-]])
+set(KIND_GIT "")
+configure_file(
+  "${SOURCE_DIR}/vcpkg-configuration.json.in"
+  "${VCPKG_ROOT}/vcpkg-configuration.json"
+  @ONLY
+)
+
+if(0)
+set(KIND_FILE [[$disabled-]])
+set(KIND_GIT "")
+configure_file(
+  "${SOURCE_DIR}/vcpkg-configuration.json.in"
+  "${SOURCE_DIR}/../vcpkg-configuration.json"
+  @ONLY
+)
+endif()
+
+configure_file(
+  "${SOURCE_DIR}/options.in"
+  "${VCPKG_ROOT}/options"
+  @ONLY
+)
+

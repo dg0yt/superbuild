@@ -1,0 +1,14 @@
+{
+  "name": "xz-utils",
+  "version-string": "5.2.4",
+  "description": "General purpose data compression library",
+  "homepage": "https://tukaani.org/xz/",
+  "supports": "!windows",
+  "dependencies": [
+    {
+      "name": "dpkg-source-util",
+      "host": true
+    },
+    "libiconv"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "default": {
+    "base-files":        { "baseline": "11" },
+    "dpkg-source-util":  { "baseline": "2021-03-20" },
+    "xz-utils":          { "baseline": "5.2.4" },
+    "zlib":              { "baseline": "1.12.11", "port-version": 0 }
+  }
+}
