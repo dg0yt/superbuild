@@ -26,9 +26,11 @@ foreach(command list search update)
 endforeach()
 
 message(STATUS "The following ports are available via CMake targets (<PORT>-install/remove):")
-foreach(port ${VCPKG_PORTS})
-	message(STATUS "  ${port}")
-	string(REGEX REPLACE " .*" "" port "${port}")
+set(all_ports )
+foreach(port_with_version ${VCPKG_PORTS})
+	message(STATUS "  ${port_with_version}")
+	string(REGEX REPLACE " .*" "" port "${port_with_version}")
+	string(APPEND all_ports "${port}\n")
 	string(MAKE_C_IDENTIFIER "${port}" port_id)
 	add_custom_target("${port_id}-install"
 	  DEPENDS vcpkg-tool
@@ -43,3 +45,13 @@ foreach(port ${VCPKG_PORTS})
 	  VERBATIM
 	)
 endforeach()
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/all-ports" "${all_ports}")
+add_custom_target(all-install
+  DEPENDS vcpkg-tool
+  COMMAND ${VCPKG_COMMAND} install @all-ports
+)
+add_custom_target(all-remove
+  DEPENDS vcpkg-tool
+  COMMAND ${VCPKG_COMMAND} remove @all-ports
+)

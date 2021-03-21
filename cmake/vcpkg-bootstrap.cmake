@@ -68,3 +68,7 @@ ExternalProject_Add(vcpkg-tool
     ${VCPKG_COMMAND} --debug search
   TEST_AFTER_INSTALL 1
 )
+
+add_custom_target(vcpkg
+  DEPENDS vcpkg-root vcpkg-configuration vcpkg-tool
+)
