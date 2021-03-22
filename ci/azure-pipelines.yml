@@ -32,8 +32,8 @@ jobs:
   timeoutInMinutes: 120
   variables:
     IMAGE_NAME: 'macos-10.15'
-    VCPKG_DOWNLOADS: $(Build.BuildDirectory)/downloads
-    VCPKG_BINARY_CACHE: $(Build.BuildDirectory)/binary
+    VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
+    VCPKG_BINARY_CACHE: $(Build.StagingDirectory)/binary
     VCPKG_FEATURE_FLAGS: registries
     CC: gcc-10
     CXX: g++-10
@@ -46,18 +46,3 @@ jobs:
     - template: build.yml
     - template: publish.yml
 
-- job: Linux
-  timeoutInMinutes: 120
-  variables:
-    IMAGE_NAME: 'ubuntu-20.04'
-    VCPKG_DOWNLOADS: $(Build.BuildDirectory)/downloads
-    VCPKG_BINARY_CACHE: $(Build.BuildDirectory)/binary
-    VCPKG_FEATURE_FLAGS: registries
-    VERBOSE: 1
-  pool:
-    vmImage: '$(IMAGE_NAME)'
-  steps:
-    - template: setup-ubuntu.yml
-    - template: build.yml
-    - template: publish.yml
-  condition: False

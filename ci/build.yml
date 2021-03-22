@@ -27,11 +27,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-parameters:
-  cmakeArgs:
-  buildArgs: -j3
-
-
 steps:
 - checkout: self
   path: ports
@@ -39,37 +34,22 @@ steps:
 - bash: |
     set -x
     set -e
-    git clone --depth 1 --branch vcpkg https://github.com/dg0yt/superbuild.git "$(Agent.BuildDirectory)/vcpkg"
-  displayName: 'Checkout vcpkg helper'
+    git config --global init.defaultBranch main
+    test -f "$(Build.SourcesDirectory)/bootstrap.sh"
+    "$(Build.SourcesDirectory)/bootstrap.sh" "$(Build.SourcesDirectory)"
+    export VCPKG_ROOT="${PWD}"
+    test -d "${VCPKG_ROOT}"
+    test -f "${VCPKG_ROOT}/vcpkg" || test -f "${VCPKG_ROOT}/vcpkg.exe"
+    "${VCPKG_ROOT}/vcpkg" --debug search dpkg
+    echo "##vso[task.setVariable variable=VCPKG_ROOT]${VCPKG_ROOT}"
+  displayName: 'Bootstrap vcpkg tool and registries'
 
-- task: CMake@1
-  inputs:
-    workingDirectory: 'build'
-    cmakeArgs: >
-      "$(Agent.BuildDirectory)/vcpkg"
-      -DCMAKE_BUILD_TYPE=Release
-      "-DVCPKG_ALLOW_APPLE_CLANG=OFF"
-      "-DREGISTRY_DEFAULT_ROOT=$(Agent.BuildDirectory)/ports"
-      "-DREGISTRY_EXTRA=VCPKG"
-      "-DREGISTRY_VCPKG_ROOT=https://github.com/microsoft/vcpkg.git"
-      "-DREGISTRY_VCPKG_PACKAGES=vcpkg-cmake;vcpkg-cmake-config;libiconv"
-      ${{ parameters.cmakeArgs }}
-  displayName: 'Configure'
+- bash: |
+    set -x
+    set -e
+    env | grep VCPKG_
+    "${VCPKG_ROOT}/vcpkg" install base-files
+    "${VCPKG_ROOT}/vcpkg" install zlib
+    "${VCPKG_ROOT}/vcpkg" install xz-utils
+  displayName: 'Build packages'
 
-- task: CMake@1
-  inputs:
-    workingDirectory: 'build'
-    cmakeArgs: >
-      --build .
-      --target vcpkg
-  timeoutInMinutes: 210
-  displayName: 'Build vcpkg'
-
-- task: CMake@1
-  inputs:
-    workingDirectory: 'build'
-    cmakeArgs: >
-      --build .
-      --target all-install
-  timeoutInMinutes: 210
-  displayName: 'Build source package'
