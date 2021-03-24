@@ -21,8 +21,8 @@ cd vcpkg-tool
 git init .
 git fetch https://github.com/microsoft/vcpkg-tool.git main
 git checkout FETCH_HEAD
-git fetch https://github.com/dg0yt/vcpkg-tool.git registry-packages
-git merge --no-ff --no-edit FETCH_HEAD
+#git fetch https://github.com/dg0yt/vcpkg-tool.git registry-packages
+#git merge --no-ff --no-edit FETCH_HEAD
 git fetch https://github.com/dg0yt/vcpkg-tool.git shallow-registries
 git merge --no-ff --no-edit FETCH_HEAD
 cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0 -DVCPKG_ALLOW_APPLE_CLANG=1

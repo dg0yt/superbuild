@@ -33,7 +33,7 @@ jobs:
   variables:
     IMAGE_NAME: 'macos-10.15'
     VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
-    VCPKG_BINARY_CACHE: $(Build.StagingDirectory)/binary
+    VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
     VCPKG_FEATURE_FLAGS: registries
     CC: gcc-10
     CXX: g++-10

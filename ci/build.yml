@@ -31,6 +31,26 @@ steps:
 - checkout: self
   path: ports
 
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'specific'
+    project: '$(System.TeamProjectId)'
+    pipeline: 6
+    buildVersionToDownload: 'latest'
+    artifactName: 'source'
+    downloadPath: $(VCPKG_DOWNLOADS)
+  displayName: 'Download sources'
+
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'specific'
+    project: '$(System.TeamProjectId)'
+    pipeline: 6
+    buildVersionToDownload: 'latest'
+    artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
+    downloadPath: $(VCPKG_DEFAULT_BINARY_CACHE)
+  displayName: 'Download binaries'
+
 - bash: |
     set -x
     set -e
@@ -42,6 +62,8 @@ steps:
     test -f "${VCPKG_ROOT}/vcpkg" || test -f "${VCPKG_ROOT}/vcpkg.exe"
     "${VCPKG_ROOT}/vcpkg" --debug search dpkg
     echo "##vso[task.setVariable variable=VCPKG_ROOT]${VCPKG_ROOT}"
+    mkdir -p "$(VCPKG_DOWNLOADS)"
+    mkdir -p "$(VCPKG_DEFAULT_BINARY_CACHE)"
   displayName: 'Bootstrap vcpkg tool and registries'
 
 - bash: |
@@ -53,3 +75,14 @@ steps:
     "${VCPKG_ROOT}/vcpkg" install xz-utils
   displayName: 'Build packages'
 
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(VCPKG_DOWNLOADS)'
+    artifactName: source
+  displayName: 'Publish sources'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(VCPKG_DEFAULT_BINARY_CACHE)'
+    artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
+  displayName: 'Publish binaries'
