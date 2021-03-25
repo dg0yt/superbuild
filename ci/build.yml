@@ -39,7 +39,8 @@ steps:
     buildVersionToDownload: 'latest'
     artifactName: 'source'
     downloadPath: $(VCPKG_DOWNLOADS)
-  displayName: 'Download sources'
+  continueOnError: true
+  displayName: 'Download cached sources'
 
 - task: DownloadBuildArtifacts@0
   inputs:
@@ -49,30 +50,58 @@ steps:
     buildVersionToDownload: 'latest'
     artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
     downloadPath: $(VCPKG_DEFAULT_BINARY_CACHE)
-  displayName: 'Download binaries'
+  continueOnError: true
+  displayName: 'Download cached binaries'
 
 - bash: |
     set -x
     set -e
-    git config --global init.defaultBranch main
-    test -f "$(Build.SourcesDirectory)/bootstrap.sh"
-    "$(Build.SourcesDirectory)/bootstrap.sh" "$(Build.SourcesDirectory)"
-    export VCPKG_ROOT="${PWD}"
-    test -d "${VCPKG_ROOT}"
-    test -f "${VCPKG_ROOT}/vcpkg" || test -f "${VCPKG_ROOT}/vcpkg.exe"
-    "${VCPKG_ROOT}/vcpkg" --debug search dpkg
-    echo "##vso[task.setVariable variable=VCPKG_ROOT]${VCPKG_ROOT}"
-    mkdir -p "$(VCPKG_DOWNLOADS)"
-    mkdir -p "$(VCPKG_DEFAULT_BINARY_CACHE)"
-  displayName: 'Bootstrap vcpkg tool and registries'
+    "$(Build.SourcesDirectory)/bootstrap/make-root.sh" "$(Build.SourcesDirectory)"
+    SCRIPT_SHA256="$(cmake -E sha256sum bootstrap/make-vcpkg-tool.sh  | sed 's/^\(........\).*/\1/')"
+    VCPKG_TOOL_CACHE="$(VCPKG_DEFAULT_BINARY_CACHE)/vcpkg-tool-${SCRIPT_SHA256}"
+    for I in vcpkg vcpkg.exe; do
+        if [ -f "${VCPKG_TOOL_CACHE}/${I}" ]; then
+            cp "${VCPKG_TOOL_CACHE}/${I}" "${I}"
+            echo "##vso[task.setVariable variable=VCPKG_TOOL]${I}"
+        fi
+    done
+    echo "##vso[task.setVariable variable=VCPKG_TOOL_CACHE]${VCPKG_TOOL_CACHE}"
+    echo "##vso[task.setVariable variable=VCPKG_ROOT]${PWD}"
+    true
+  displayName: 'Bootstrap vcpkg root and configuration'
 
 - bash: |
     set -x
     set -e
-    env | grep VCPKG_
-    "${VCPKG_ROOT}/vcpkg" install base-files
-    "${VCPKG_ROOT}/vcpkg" install zlib
-    "${VCPKG_ROOT}/vcpkg" install xz-utils
+    test -n "$(VCPKG_DEFAULT_BINARY_CACHE)"
+    test -n "$(VCPKG_TOOL_CACHE)"
+    bootstrap/make-vcpkg-tool.sh
+    rm -Rf "$(VCPKG_DEFAULT_BINARY_CACHE)/vcpkg-tool-"*
+    mkdir -p "${VCPKG_TOOL_CACHE}"
+    for I in vcpkg vcpkg.exe; do
+        if [ -f "${I}" ]; then
+            cp "${I}" "${VCPKG_TOOL_CACHE}/${I}"
+            echo "##vso[task.setVariable variable=VCPKG_TOOL]${I}"
+        fi
+    done
+  displayName: 'Build vcpkg tool'
+  condition: eq('${{ variables.VCPKG_TOOL }}', '')
+
+- bash: |
+    set -x
+    set -e
+    env | grep VCPKG_ | sort
+    test -f "${VCPKG_TOOL}"
+    while read PACKAGE; do
+        "${VCPKG_TOOL}" install "${PACKAGE}" || {
+          "${VCPKG_TOOL}" --debug search "${PACKAGE}"
+          "${VCPKG_TOOL}" --debug install "${PACKAGE}"
+        }
+    done << END_PACKAGES
+      base-files
+      zlib
+      xz-utils
+    END_PACKAGES
   displayName: 'Build packages'
 
 - task: PublishBuildArtifacts@1
@@ -86,3 +115,4 @@ steps:
     pathToPublish: '$(VCPKG_DEFAULT_BINARY_CACHE)'
     artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
   displayName: 'Publish binaries'
+

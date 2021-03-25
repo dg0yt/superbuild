@@ -2,6 +2,13 @@
 
 # Copyright 2021 Kai Pastor <dg0yt@darc.de>
 
+# This scripts operates in the current working directory and creates a
+# vcpkg root configured to use the versions and ports in the directory
+# passed via the first parameter as default registry, together with
+# selected packages from Microsofts registry which either is found in
+# VCPKG_INSTALLATION_ROOT, or will be cloned from
+# https://github.com/microsoft/vcpkg.git
+
 set -e
 
 if [ ! -d "$1" ]; then
@@ -10,32 +17,16 @@ if [ ! -d "$1" ]; then
 fi
 
 if [ -z "${VCPKG_INSTALLATION_ROOT}" ]; then
+    echo "VCPKG_INSTALLATION_ROOT is empty."
     VCPKG_INSTALLATION_ROOT="${PWD}/vcpkg-root"
+    echo "Using ${VCPKG_INSTALLATION_ROOT}"
     if [ ! -d "${VCPKG_INSTALLATION_ROOT}" ]; then
-        git clone "https://github.com/microsoft/vcpkg.git" vcpkg-root
+        git -c init.defaultBranch=main clone "https://github.com/microsoft/vcpkg.git" vcpkg-root
     fi
 fi
 
-mkdir -p vcpkg-tool
-cd vcpkg-tool
-git init .
-git fetch https://github.com/microsoft/vcpkg-tool.git main
-git checkout FETCH_HEAD
-#git fetch https://github.com/dg0yt/vcpkg-tool.git registry-packages
-#git merge --no-ff --no-edit FETCH_HEAD
-git fetch https://github.com/dg0yt/vcpkg-tool.git shallow-registries
-git merge --no-ff --no-edit FETCH_HEAD
-cmake . -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0 -DVCPKG_ALLOW_APPLE_CLANG=1
-cmake --build .
-cd ..
-
 test -e scripts || ln -s "${VCPKG_INSTALLATION_ROOT}/scripts" .
 test -e triplets || ln -s "${VCPKG_INSTALLATION_ROOT}/triplets" .
-if [ -f vcpkg-tool/vcpkg.exe ]; then
-    test -e vcpkg.exe || ln -s vcpkg-tool/vcpkg.exe .
-else
-    test -e vcpkg || ln -s vcpkg-tool/vcpkg .
-fi
 
 cat > vcpkg-configuration.json <<END_CONFIG
 {
@@ -53,5 +44,5 @@ cat > vcpkg-configuration.json <<END_CONFIG
 }
 END_CONFIG
 
-echo "Set VCPKG_ROOT=\"${PWD}\" before using ${PWD}/vcpkg"
+echo "Set VCPKG_ROOT=\"${PWD}\" before using vcpkg."
 

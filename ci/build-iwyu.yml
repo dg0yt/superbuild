@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2021 Kai Pastor
+# Copyright 2019, 2020 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -27,21 +27,21 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-jobs:
-- job: macOS
-  timeoutInMinutes: 120
-  variables:
-    IMAGE_NAME: 'macos-10.15'
-    VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
-    VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
-    VCPKG_FEATURE_FLAGS: registries
-    CC: gcc-10
-    CXX: g++-10
-    MACOSX_DEPLOYMENT_TARGET: 10.12
-    VERBOSE: 1
-  pool:
-    vmImage: '$(IMAGE_NAME)'
-  steps:
-    - template: setup-macos.yml
-    - template: build.yml
+steps:
+- bash: |
+    set -x
+    set -e
+    sudo apt-get remove -y libllvm8   # possibly incompatible
+    sudo apt-get install clang-8 libclang-8-dev llvm-8-dev
+    cd $(Build.SourcesDirectory)/build
+    make help | \
+      grep -- ' iwyu-' | \
+      sort | \
+      head -n 1 | \
+      while read DOTS TARGET; do
+        case "${TARGET}" in
+          iwyu-*)             make "${TARGET}" ;;
+        esac
+      done
+  displayName: 'Build iwyu'
 
