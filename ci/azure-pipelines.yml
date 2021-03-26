@@ -56,6 +56,7 @@ jobs:
   - template: build.yml
 
 - job: Windows
+  condition: false
   timeoutInMinutes: 120
   variables:
     MINGW: mingw64

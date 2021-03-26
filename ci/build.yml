@@ -38,7 +38,7 @@ steps:
     pipeline: 6
     buildVersionToDownload: 'latest'
     artifactName: 'source'
-    downloadPath: $(VCPKG_DOWNLOADS)
+    downloadPath: $(VCPKG_DOWNLOADS)/..
   continueOnError: true
   displayName: 'Download cached sources'
 
@@ -49,9 +49,15 @@ steps:
     pipeline: 6
     buildVersionToDownload: 'latest'
     artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
-    downloadPath: $(VCPKG_DEFAULT_BINARY_CACHE)
+    downloadPath: $(VCPKG_DEFAULT_BINARY_CACHE)/..
   continueOnError: true
   displayName: 'Download cached binaries'
+
+- bash: |
+    set -e
+    set -x
+    rm -Rf "$(VCPKG_DOWNLOADS)/source"
+    rm -Rf "$(VCPKG_DEFAULT_BINARY_CACHE)/$(Agent.OSArchitecture)-$(Agent.OS)"
 
 - bash: |
     set -e
