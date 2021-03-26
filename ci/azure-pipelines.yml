@@ -60,8 +60,6 @@ jobs:
   variables:
     MINGW: mingw64
     SUPERBUILD_INSTALL_DIR_NATIVE: 'C:\msys2'
-    VCPKG_DEFAULT_TRIPLET: x64-mingw-dynamic
-    VCPKG_DEFAULT_HOST_TRIPLET: x64-mingw-dynamic
     VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
     VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
     VCPKG_FEATURE_FLAGS: registries

@@ -54,25 +54,28 @@ steps:
   displayName: 'Download cached binaries'
 
 - bash: |
-    set -x
     set -e
+    set -x
+    git config --global advice.detachedHead false
     "$(Build.SourcesDirectory)/bootstrap/make-root.sh" "$(Build.SourcesDirectory)"
     SCRIPT_SHA256="$(cmake -E sha256sum bootstrap/make-vcpkg-tool.sh  | sed 's/^\(........\).*/\1/')"
     VCPKG_TOOL_CACHE="$(VCPKG_DEFAULT_BINARY_CACHE)/vcpkg-tool-${SCRIPT_SHA256}"
+    VCPKG_TOOL=
     for I in vcpkg vcpkg.exe; do
         if [ -f "${VCPKG_TOOL_CACHE}/${I}" ]; then
-            cp "${VCPKG_TOOL_CACHE}/${I}" "${I}"
-            echo "##vso[task.setVariable variable=VCPKG_TOOL]${I}"
+            VCPKG_TOOL="${I}"
+            cp "${VCPKG_TOOL_CACHE}/${VCPKG_TOOL}" "${VCPKG_TOOL}"
         fi
     done
+    set +x
+    echo "##vso[task.setVariable variable=VCPKG_TOOL]${VCPKG_TOOL}"
     echo "##vso[task.setVariable variable=VCPKG_TOOL_CACHE]${VCPKG_TOOL_CACHE}"
     echo "##vso[task.setVariable variable=VCPKG_ROOT]${PWD}"
-    true
   displayName: 'Bootstrap vcpkg root and configuration'
 
 - bash: |
-    set -x
     set -e
+    set -x
     test -n "$(VCPKG_DEFAULT_BINARY_CACHE)"
     test -n "$(VCPKG_TOOL_CACHE)"
     case "$(uname -s)" in
@@ -81,21 +84,25 @@ steps:
       export CXX=g++-10
       ;;
     esac
+    git config --global user.name "Azure pipelines"  # needed for ubuntu & windows image
+    git config --global user.email noreply@localhost # needed for windows image
     bootstrap/make-vcpkg-tool.sh
     rm -Rf "$(VCPKG_DEFAULT_BINARY_CACHE)/vcpkg-tool-"*
     mkdir -p "${VCPKG_TOOL_CACHE}"
     for I in vcpkg vcpkg.exe; do
         if [ -f "${I}" ]; then
-            cp "${I}" "${VCPKG_TOOL_CACHE}/${I}"
-            echo "##vso[task.setVariable variable=VCPKG_TOOL]${I}"
+            VCPKG_TOOL="${I}"
+            cp "${VCPKG_TOOL}" "${VCPKG_TOOL_CACHE}/${VCPKG_TOOL}"
         fi
     done
+    set +x
+    echo "##vso[task.setVariable variable=VCPKG_TOOL]${VCPKG_TOOL}"
   displayName: 'Build vcpkg tool'
   condition: eq('${{ variables.VCPKG_TOOL }}', '')
 
 - bash: |
-    set -x
     set -e
+    set -x
     env | grep VCPKG_ | sort
     test -f "${VCPKG_TOOL}"
     while read PACKAGE; do
@@ -121,4 +128,3 @@ steps:
     pathToPublish: '$(VCPKG_DEFAULT_BINARY_CACHE)'
     artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
   displayName: 'Publish binaries'
-
