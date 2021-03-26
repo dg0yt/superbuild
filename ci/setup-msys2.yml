@@ -35,9 +35,13 @@ steps:
     if msys-%MINGW%==msys-mingw32 (
       echo ##vso[task.setVariable variable=MSYSTEM]MINGW32
       echo ##vso[task.setVariable variable=MSYSTEM_CARCH]i686
+      echo ##vso[task.setVariable variable=VCPKG_DEFAULT_TRIPLET]x86-mingw-dynamic
+      echo ##vso[task.setVariable variable=VCPKG_DEFAULT_HOST_TRIPLET]x86-mingw-dynamic
     ) else (
       echo ##vso[task.setVariable variable=MSYSTEM]MINGW64
       echo ##vso[task.setVariable variable=MSYSTEM_CARCH]x86_64
+      echo ##vso[task.setVariable variable=VCPKG_DEFAULT_TRIPLET]x64-mingw-dynamic
+      echo ##vso[task.setVariable variable=VCPKG_DEFAULT_HOST_TRIPLET]x64-mingw-dynamic
     )
   displayName: 'Setup MSYS2 environment variables'
 

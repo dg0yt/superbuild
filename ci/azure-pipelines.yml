@@ -28,20 +28,38 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 jobs:
-- job: macOS
+- job: Build
   timeoutInMinutes: 120
   variables:
-    IMAGE_NAME: 'macos-10.15'
     VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
     VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
     VCPKG_FEATURE_FLAGS: registries
-    CC: gcc-10
-    CXX: g++-10
-    MACOSX_DEPLOYMENT_TARGET: 10.12
     VERBOSE: 1
+  strategy:
+    maxParallel: 5
+    matrix:
+      macOS:
+        IMAGE_NAME: 'macos-10.15'
+        SETUP: 'macos'
+        MACOSX_DEPLOYMENT_TARGET: 10.12
+      Linux:
+        IMAGE_NAME: 'ubuntu-20.04'
+        SETUP: 'ubuntu'
+      MinGW_x64:
+        IMAGE_NAME: 'windows-2019'
+        SETUP: 'msys2'
+        MINGW: mingw64
+        VCPKG_DEFAULT_TRIPLET: x64-mingw-dynamic
+        VCPKG_DEFAULT_HOST_TRIPLET: x64-mingw-dynamic
+        SUPERBUILD_INSTALL_DIR_NATIVE: 'C:\msys2'
   pool:
     vmImage: '$(IMAGE_NAME)'
   steps:
+  - ${{ if eq(variables['Agent.OS'], 'Darwin') }}:
     - template: setup-macos.yml
-    - template: build.yml
+  - ${{ if eq(variables['Agent.OS'], 'Linux') }}:
+    - template: setup-ubuntu.yml
+  - ${{ if eq(variables['Agent.OS'], 'Windows_NT') }}:
+    - template: setup-msys2.yml
+  - template: build.yml
 

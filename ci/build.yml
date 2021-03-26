@@ -75,6 +75,12 @@ steps:
     set -e
     test -n "$(VCPKG_DEFAULT_BINARY_CACHE)"
     test -n "$(VCPKG_TOOL_CACHE)"
+    case "$(uname -s)" in
+    Darwin*)
+      export CC=gcc-10
+      export CXX=g++-10
+      ;;
+    esac
     bootstrap/make-vcpkg-tool.sh
     rm -Rf "$(VCPKG_DEFAULT_BINARY_CACHE)/vcpkg-tool-"*
     mkdir -p "${VCPKG_TOOL_CACHE}"
