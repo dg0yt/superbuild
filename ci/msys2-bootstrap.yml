@@ -30,7 +30,7 @@
 variables:
   CHERE_INVOKING: enabled_from_arguments
   MSYSCON: defterm
-  SUPERBUILD_INSTALL_DIR_NATIVE: 'C:\msys2'
+  MSYS2_INSTALL_DIR: 'C:\msys2'
 
 pool:
   vmImage: 'windows-2019'
@@ -51,17 +51,17 @@ steps:
   inputs:
     pipelineId: $(openorienteering.superbuild.msysBuildId)
     artifactName: 'MSYS2-$(MINGW)-base'
-    targetPath: $(SUPERBUILD_INSTALL_DIR_NATIVE)
+    targetPath: $(MSYS2_INSTALL_DIR)
   condition: variables['openorienteering.superbuild.msysBuildId']
   displayName: 'Download MSYS2 base artifacts'
 
 - script: |
-    choco install msys2 --params="/InstallDir:%SUPERBUILD_INSTALL_DIR_NATIVE% /NoUpdate /NoPath"
+    choco install msys2 --params="/InstallDir:%MSYS2_INSTALL_DIR% /NoUpdate /NoPath"
   condition: not(variables['openorienteering.superbuild.msysBuildId'])
   displayName: 'Install MSYS2'
 
 - script: |
-    echo ##vso[task.prependpath]%SUPERBUILD_INSTALL_DIR_NATIVE%\usr\bin
+    echo ##vso[task.prependpath]%MSYS2_INSTALL_DIR%\usr\bin
   displayName: 'Add MSYS2 to path'
 
 - script: |
@@ -76,7 +76,7 @@ steps:
   displayName: 'Update the package database and base packages'
 
 - script: |
-    pacman --noconfirm -Su 2>error.log
+    pacman --noconfirm -Syu 2>error.log
     if errorlevel 1 (
       type error.log 1>&2
       exit /b 1
@@ -87,7 +87,7 @@ steps:
   displayName: 'Update the rest of the base package'
 
 - script: |
-    pacman --noconfirm -S --needed ^
+    pacman --noconfirm -Sy --needed ^
       bison ^
       diffutils ^
       flex ^
@@ -121,7 +121,7 @@ steps:
   displayName: 'Reduce installation size for CI'
 
 - script: |
-    cd /D %SUPERBUILD_INSTALL_DIR_NATIVE%\%MINGW%
+    cd /D %MSYS2_INSTALL_DIR%\%MINGW%
     if not exist superbuild\share\doc\copyright (
       mkdir superbuild\share\doc\copyright
     )
@@ -137,10 +137,8 @@ steps:
     type share\licenses\libwinpthread\COPYING > superbuild\share\doc\copyright\mingw-w64-msys2.txt
   displayName: 'Generate copyright files for toolchain libraries'
 
-- task: PublishPipelineArtifact@0
-  inputs:
-    artifactName: 'MSYS2-$(MINGW)-base'
-    targetPath: $(SUPERBUILD_INSTALL_DIR_NATIVE)
+- publish: $(MSYS2_INSTALL_DIR)
+  artifact: MSYS2-$(MINGW)-base
   displayName: 'Publish MSYS2 base artifacts'
 
 - script: |
@@ -169,8 +167,6 @@ steps:
     )
   displayName: 'Get extra source tarballs'
 
-- task: PublishPipelineArtifact@0
-  inputs:
-    artifactName: 'MSYS2-$(MINGW)-source'
-    targetPath: '$(Build.SourcesDirectory)\mingw-source'
+- publish: $(Build.SourcesDirectory)\mingw-source
+  artifact: MSYS2-$(MINGW)-source
   displayName: 'Publish MSYS2 source artifacts'
