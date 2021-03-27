@@ -27,13 +27,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+resources:
+  pipelines:
+  - pipeline: cache
+    source: vcpkg-ports
+  - pipeline: msys2
+    source: msys2-bootstrap
+
+variables:
+  CI_BASH: bash
+  CI_BASH_ENV: bash
+
 jobs:
 - job: macOS
   timeoutInMinutes: 120
   variables:
     MACOSX_DEPLOYMENT_TARGET: 10.12
-    VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
-    VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
+    VCPKG_DOWNLOADS: $(Pipeline.Workspace)/cache/source
+    VCPKG_DEFAULT_BINARY_CACHE: $(Pipeline.Workspace)/cache/binary
     VCPKG_FEATURE_FLAGS: registries
     VERBOSE: 1
   pool:
@@ -45,8 +56,8 @@ jobs:
 - job: Linux
   timeoutInMinutes: 120
   variables:
-    VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
-    VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
+    VCPKG_DOWNLOADS: $(Pipeline.Workspace)/cache/source
+    VCPKG_DEFAULT_BINARY_CACHE: $(Pipeline.Workspace)/cache/binary
     VCPKG_FEATURE_FLAGS: registries
     VERBOSE: 1
   pool:
@@ -58,6 +69,7 @@ jobs:
 - job: Windows
   timeoutInMinutes: 120
   variables:
+    CI_BASH: C:/msys2/usr/bin/bash.exe
     CHERE_INVOKING: enabled_from_arguments
     MINGW: mingw64
     MSYSCON: defterm
@@ -66,8 +78,8 @@ jobs:
     MSYS2_INSTALL_DIR: 'C:\msys2'
     VCPKG_DEFAULT_TRIPLET: x64-mingw-dynamic
     VCPKG_DEFAULT_HOST_TRIPLET: x64-mingw-dynamic
-    VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
-    VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
+    VCPKG_DOWNLOADS: $(Pipeline.Workspace)/cache/source
+    VCPKG_DEFAULT_BINARY_CACHE: $(Pipeline.Workspace)/cache/binary
     VCPKG_FEATURE_FLAGS: registries
     VERBOSE: 1
   pool:

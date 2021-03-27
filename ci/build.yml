@@ -31,25 +31,13 @@ steps:
 - checkout: self
   path: ports
 
-- task: DownloadBuildArtifacts@0
-  inputs:
-    buildType: 'specific'
-    project: '$(System.TeamProjectId)'
-    pipeline: 6
-    buildVersionToDownload: 'latest'
-    artifactName: 'source'
-    downloadPath: $(VCPKG_DOWNLOADS)/..
+- download: cache
+  artifact: source
   continueOnError: true
   displayName: 'Download cached sources'
 
-- task: DownloadBuildArtifacts@0
-  inputs:
-    buildType: 'specific'
-    project: '$(System.TeamProjectId)'
-    pipeline: 6
-    buildVersionToDownload: 'latest'
-    artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
-    downloadPath: $(VCPKG_DEFAULT_BINARY_CACHE)/..
+- download: cache
+  artifact: $(Agent.OSArchitecture)-$(Agent.OS)
   continueOnError: true
   displayName: 'Download cached binaries'
 
@@ -57,11 +45,7 @@ steps:
     set -e
     set -x
     rm -Rf "$(VCPKG_DOWNLOADS)/source"
-    rm -Rf "$(VCPKG_DEFAULT_BINARY_CACHE)/$(Agent.OSArchitecture)-$(Agent.OS)"
-
-- bash: |
-    set -e
-    set -x
+    mv "$(Pipeline.Workspace)/cache/$(Agent.OSArchitecture)-$(Agent.OS)" "$(VCPKG_DEFAULT_BINARY_CACHE)"
     git config --global advice.detachedHead false
     "$(Build.SourcesDirectory)/bootstrap/make-root.sh" "$(Build.SourcesDirectory)"
     SCRIPT_SHA256="$(cmake -E sha256sum bootstrap/make-vcpkg-tool.sh  | sed 's/^\(........\).*/\1/')"
@@ -77,60 +61,73 @@ steps:
     echo "##vso[task.setVariable variable=VCPKG_TOOL]${VCPKG_TOOL}"
     echo "##vso[task.setVariable variable=VCPKG_TOOL_CACHE]${VCPKG_TOOL_CACHE}"
     echo "##vso[task.setVariable variable=VCPKG_ROOT]${PWD}"
-  displayName: 'Bootstrap vcpkg root and configuration'
+  displayName: 'Bootstrap vcpkg'
 
 - bash: |
+    set -x
+    BASH_ENV="${CI_BASH_ENV}" ${CI_BASH} -s << END_CI
     set -e
     set -x
+    echo "PATH=\${PATH}"
     test -n "$(VCPKG_DEFAULT_BINARY_CACHE)"
     test -n "$(VCPKG_TOOL_CACHE)"
     case "$(uname -s)" in
-    Darwin*)
-      export CC=gcc-10
-      export CXX=g++-10
-      ;;
+      Darwin*)
+        export CC=gcc-10
+        export CXX=g++-10
+        ;;
     esac
     git config --global user.name "Azure pipelines"  # needed for ubuntu & windows image
     git config --global user.email noreply@localhost # needed for windows image
     bootstrap/make-vcpkg-tool.sh
     rm -Rf "$(VCPKG_DEFAULT_BINARY_CACHE)/vcpkg-tool-"*
-    mkdir -p "${VCPKG_TOOL_CACHE}"
+    mkdir -p "\${VCPKG_TOOL_CACHE}"
     for I in vcpkg vcpkg.exe; do
-        if [ -f "${I}" ]; then
-            VCPKG_TOOL="${I}"
-            cp "${VCPKG_TOOL}" "${VCPKG_TOOL_CACHE}/${VCPKG_TOOL}"
+        if [ -f "\${I}" ]; then
+            VCPKG_TOOL="\${I}"
+            cp "\${VCPKG_TOOL}" "\${VCPKG_TOOL_CACHE}/\${VCPKG_TOOL}"
         fi
     done
     set +x
-    echo "##vso[task.setVariable variable=VCPKG_TOOL]${VCPKG_TOOL}"
+    echo "##vso[task.setVariable variable=VCPKG_TOOL]\${VCPKG_TOOL}"
+    END_CI
   displayName: 'Build vcpkg tool'
   condition: eq('${{ variables.VCPKG_TOOL }}', '')
 
 - bash: |
+    set -x
+    BASH_ENV="${CI_BASH_ENV}" ${CI_BASH} -s << END_CI
     set -e
     set -x
+    echo "PATH=\${PATH}"
+    if [ -n "\${MSYS2_INSTALL_DIR}" ]; then
+        unset CC
+        unset CXX
+        unset PKG_CONFIG_PATH
+        #source "\${MSYS2_INSTALL_DIR/\\/\/}/etc/profile"
+        export PATH="\${MSYS2_INSTALL_DIR/\\/\/}:\${PATH}"
+    fi
     env | grep VCPKG_ | sort
-    test -f "${VCPKG_TOOL}"
+    test -f "\${VCPKG_TOOL}"
     while read PACKAGE; do
-        "${VCPKG_TOOL}" install "${PACKAGE}" || {
-          "${VCPKG_TOOL}" --debug search "${PACKAGE}"
-          "${VCPKG_TOOL}" --debug install "${PACKAGE}"
+        "\${VCPKG_TOOL}" install "\${PACKAGE}" || {
+          "\${VCPKG_TOOL}" --debug search "\${PACKAGE}"
+          "\${VCPKG_TOOL}" --debug install "\${PACKAGE}"
         }
     done << END_PACKAGES
       base-files
       zlib
       xz-utils
     END_PACKAGES
+    echo 'tools' > '$(VCPKG_DOWNLOADS)/.artifactignore'
+    END_CI
   displayName: 'Build packages'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: '$(VCPKG_DOWNLOADS)'
-    artifactName: source
+- publish: $(VCPKG_DOWNLOADS)
+  artifact: source
+  condition: eq( variables.Agent.OS, 'Darwin')
   displayName: 'Publish sources'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: '$(VCPKG_DEFAULT_BINARY_CACHE)'
-    artifactName: '$(Agent.OSArchitecture)-$(Agent.OS)'
+- publish: $(VCPKG_DEFAULT_BINARY_CACHE)
+  artifact: $(Agent.OSArchitecture)-$(Agent.OS)
   displayName: 'Publish binaries'

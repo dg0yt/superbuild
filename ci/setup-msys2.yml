@@ -28,29 +28,27 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 steps:
-- task: DownloadBuildArtifacts@0
-  inputs:
-    buildType: 'specific'
-    project: '$(System.TeamProjectId)'
-    pipeline: 7
-    buildVersionToDownload: 'latest'
-    artifactName: 'MSYS2-$(MINGW)-base'
-    targetPath: $(MSYS2_INSTALL_DIR).download
-  displayName: 'Download MSYS2 base artifacts'
+- download: msys2
+  artifact: MSYS2-$(MINGW)-base
+  displayName:  Download MSYS2 base artifact
 
-- task: DownloadBuildArtifacts@0
-  inputs:
-    buildType: 'specific'
-    project: '$(System.TeamProjectId)'
-    pipeline: 7
-    buildVersionToDownload: 'latest'
-    artifactName: 'MSYS2-$(MINGW)-source'
-    targetPath: $(VCPKG_DOWNLOADS)
-  displayName: 'Download MSYS2 source artifacts'
+- download: msys2
+  artifact: MSYS2-$(MINGW)-source
+  displayName:  Download MSYS2 source artifact
 
 - script: |
     echo on
-    move "$(MSYS2_INSTALL_DIR).download\MSYS2-$(MINGW)-base" "$(MSYS2_INSTALL_DIR)"
-    echo ##vso[task.prependpath]%MSYS2_INSTALL_DIR%\usr\bin
-  displayName: 'Add MSYS2 to path'
+    mkdir "$(MSYS2_INSTALL_DIR)"
+    robocopy /E /IS /MOVE /NJH /NJS /NDL /NC /NS /NP ^
+      "$(Pipeline.Workspace)\msys2\MSYS2-$(MINGW)-base" "$(MSYS2_INSTALL_DIR)"
+    if not exist "$(MSYS2_INSTALL_DIR)\usr\bin\bash.exe" (
+        dir "$(MSYS2_INSTALL_DIR)"
+        exit 1
+    )
+    mkdir "$(VCPKG_DOWNLOADS)"
+    move "$(Pipeline.Workspace)\msys2\MSYS2-$(MINGW)-source\*" "$(VCPKG_DOWNLOADS)\"
+    echo ##vso[task.prependpath]$(MSYS2_INSTALL_DIR)\usr\bin
+    echo ##vso[task.setVariable variable=CI_BASH]$(MSYS2_INSTALL_DIR)\usr\bin\bash.exe
+    echo ##vso[task.setVariable variable=CI_BASH_ENV]/etc/profile
+  displayName: 'Integrate MSYS2 artifacts'
 
