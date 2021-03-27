@@ -38,9 +38,11 @@ pool:
 strategy:
   matrix:
     MINGW32:
+      MINGW: mingw32
       MSYSTEM: MINGW32
       MSYSTEM_CARCH: i686
     MINGW64:
+      MINGW: mingw64
       MSYSTEM: MINGW64
       MSYSTEM_CARCH: x86_64
 
@@ -148,7 +150,6 @@ steps:
     cd mingw-source
     
     set LANG=C
-    set PATH=%SUPERBUILD_INSTALL_DIR_NATIVE%\usr\bin;%WINDIR%\system32;%WINDIR%;%WINDIR%\system32\wbem
     pacman -Qo /%MINGW%/bin/libstdc++-6.dll ^
       | sed "s,-gcc-libs,-gcc," ^
       | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," > urls.txt
