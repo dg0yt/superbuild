@@ -56,11 +56,16 @@ jobs:
   - template: build.yml
 
 - job: Windows
-  condition: false
   timeoutInMinutes: 120
   variables:
+    CHERE_INVOKING: enabled_from_arguments
     MINGW: mingw64
-    SUPERBUILD_INSTALL_DIR_NATIVE: 'C:\msys2'
+    MSYSCON: defterm
+    MSYSTEM: MINGW64
+    MSYSTEM_CARCH: x86_64
+    MSYS2_INSTALL_DIR: 'C:\msys2'
+    VCPKG_DEFAULT_TRIPLET: x64-mingw-dynamic
+    VCPKG_DEFAULT_HOST_TRIPLET: x64-mingw-dynamic
     VCPKG_DOWNLOADS: $(Build.StagingDirectory)/source
     VCPKG_DEFAULT_BINARY_CACHE: $(Build.StagingDirectory)/binary
     VCPKG_FEATURE_FLAGS: registries
