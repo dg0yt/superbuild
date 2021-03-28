@@ -91,6 +91,7 @@ steps:
       bison ^
       diffutils ^
       flex ^
+      git ^
       gzip ^
       make ^
       ninja ^
