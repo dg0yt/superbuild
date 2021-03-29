@@ -27,20 +27,39 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-steps:
-- download: msys2
-  artifact: MSYS2-$(MINGW)-base
-  displayName:  Download MSYS2 base artifact
+#project: $(System.TeamProjectId)
 
+steps:
 - download: msys2
   artifact: MSYS2-$(MINGW)-source
   displayName:  Download MSYS2 source artifact
 
+- bash: |
+    echo $SHELL
+    ls -l $SHELL
+    for I in bash git cmake ninja gcc g++ clang clang++; do
+      which $I || true
+    done
+    
+    #- download: msys2
+    #  artifact: MSYS2-$(MINGW)-base
+    #  displayName:  Download MSYS2 base artifact
+
+- task: DownloadPipelineArtifact@2
+  inputs:
+    source: specific
+    project: 'superbuild'
+    pipeline: 7
+    runVersion: latestFromBranch
+    runBranch: vcpkg-ports
+    artifact: MSYS2-$(MINGW)-base
+    path: $(MSYS2_INSTALL_DIR)/..
+
 - script: |
     echo on
     mkdir "$(MSYS2_INSTALL_DIR)"
-    robocopy /E /IS /MOVE /NJH /NJS /NDL /NC /NS /NP ^
-      "$(Pipeline.Workspace)\msys2\MSYS2-$(MINGW)-base" "$(MSYS2_INSTALL_DIR)"
+    REM robocopy /E /IS /MOVE /NJH /NJS /NDL /NC /NS /NP ^
+    REM  "$(Pipeline.Workspace)\msys2\MSYS2-$(MINGW)-base" "$(MSYS2_INSTALL_DIR)"
     if not exist "$(MSYS2_INSTALL_DIR)\usr\bin\bash.exe" (
         dir "$(MSYS2_INSTALL_DIR)"
         exit 1
