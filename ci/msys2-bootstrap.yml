@@ -30,7 +30,8 @@
 variables:
   CHERE_INVOKING: enabled_from_arguments
   MSYSCON: defterm
-  MSYS2_INSTALL_DIR: 'C:\msys2'
+  MSYS2_INSTALL_DIR: 'C:\msys64'
+  PACMAN_ARCHIVE: '/var/cache/pacman/pkg'
 
 pool:
   vmImage: 'windows-2019'
@@ -47,127 +48,98 @@ strategy:
       MSYSTEM_CARCH: x86_64
 
 steps:
-- task: DownloadPipelineArtifact@0
-  inputs:
-    pipelineId: $(openorienteering.superbuild.msysBuildId)
-    artifactName: 'MSYS2-$(MINGW)-base'
-    targetPath: $(MSYS2_INSTALL_DIR)
-  condition: variables['openorienteering.superbuild.msysBuildId']
-  displayName: 'Download MSYS2 base artifacts'
+- bash: |
+    ci/msys2bash.cmd -s << END_CI
+    echo \$SHELL
+    ls -l \$SHELL
+    for I in bash git cmake ninja gcc g++ clang clang++; do
+      echo "\$I:" `which \$I` || true
+    done
+    echo "/mingw64/bin:" `cygpath -w /mingw64/bin`
+    env | sort
+    END_CI
+  displayName: Analyse environment
 
-- script: |
-    choco install msys2 --params="/InstallDir:%MSYS2_INSTALL_DIR% /NoUpdate /NoPath"
-  condition: not(variables['openorienteering.superbuild.msysBuildId'])
-  displayName: 'Install MSYS2'
-
-- script: |
-    echo ##vso[task.prependpath]%MSYS2_INSTALL_DIR%\usr\bin
-  displayName: 'Add MSYS2 to path'
-
-- script: |
-    pacman --noconfirm -Syu 2>error.log
-    if errorlevel 1 (
-      type error.log 1>&2
-      exit /b 1
-    ) else (
-      type error.log
-    )
-  condition: not(variables['openorienteering.superbuild.msysBuildId'])
-  displayName: 'Update the package database and base packages'
-
-- script: |
-    pacman --noconfirm -Syu 2>error.log
-    if errorlevel 1 (
-      type error.log 1>&2
-      exit /b 1
-    ) else (
-      type error.log
-    )
-  condition: not(variables['openorienteering.superbuild.msysBuildId'])
-  displayName: 'Update the rest of the base package'
-
-- script: |
-    pacman --noconfirm -Sy --needed ^
-      bison ^
-      diffutils ^
-      flex ^
-      git ^
-      gzip ^
-      make ^
-      ninja ^
-      patch ^
-      python ^
-      sharutils ^
-      mingw-w64-%MSYSTEM_CARCH%-binutils ^
-      mingw-w64-%MSYSTEM_CARCH%-cmake ^
-      mingw-w64-%MSYSTEM_CARCH%-gcc ^
-      mingw-w64-%MSYSTEM_CARCH%-headers-git ^
-      mingw-w64-%MSYSTEM_CARCH%-nsis ^
-      mingw-w64-%MSYSTEM_CARCH%-tools-git  ^
-      mingw-w64-%MSYSTEM_CARCH%-winpthreads-git ^
-      2>error.log
-    if errorlevel 1 (
-      type error.log 1>&2
-      exit /b 1
-    ) else (
-      type error.log
-    )
+- bash: |
+    ci/msys2bash.cmd -s << END_CI
+    echo "$(PACMAN_ARCHIVE):" `ls '$(PACMAN_ARCHIVE)'`
+    pacman --noconfirm -Sy --needed \
+      bison \
+      diffutils \
+      flex \
+      git \
+      gzip \
+      make \
+      ninja \
+      patch \
+      python \
+      sharutils \
+      mingw-w64-\${MSYSTEM_CARCH}-binutils \
+      mingw-w64-\${MSYSTEM_CARCH}-cmake \
+      mingw-w64-\${MSYSTEM_CARCH}-gcc \
+      mingw-w64-\${MSYSTEM_CARCH}-headers-git \
+      mingw-w64-\${MSYSTEM_CARCH}-nsis \
+      mingw-w64-\${MSYSTEM_CARCH}-tools-git  \
+      mingw-w64-\${MSYSTEM_CARCH}-winpthreads-git \
+      2>error.log || cat error.log
+    echo "$(PACMAN_ARCHIVE):" `ls '$(PACMAN_ARCHIVE)'`
+    END_CI
   condition: not(variables['openorienteering.superbuild.msysBuildId'])
   displayName: 'Install MSYS2 MinGW packages for OpenOrienteering Superbuild'
   
-- script: |
+- bash: |
+    ci/msys2bash.cmd -s << END_CI
     pacman --noconfirm -Scc
-    exit /b 0
-  condition: not(variables['openorienteering.superbuild.msysBuildId'])
+    echo "$(PACMAN_ARCHIVE):" `ls '$(PACMAN_ARCHIVE)'`
+    END_CI
+  #condition: not(variables['openorienteering.superbuild.msysBuildId'])
   displayName: 'Reduce installation size for CI'
 
-- script: |
-    cd /D %MSYS2_INSTALL_DIR%\%MINGW%
-    if not exist superbuild\share\doc\copyright (
-      mkdir superbuild\share\doc\copyright
-    )
+- bash: |
+    ci/msys2bash.cmd -s << END_CI
+    cd /${MINGW}
+    mkdir -p superbuild/share/doc/copyright
+    cat share/licenses/gcc-libs/README          >  superbuild/share/doc/copyright/gcc-libs-msys2.txt
+    echo ===                                    >> superbuild/share/doc/copyright/gcc-libs-msys2.txt
+    cat share/licenses/gcc-libs/COPYING.RUNTIME >> superbuild/share/doc/copyright/gcc-libs-msys2.txt
+    # Deprecation warning: Mapper still looks for gnustl*. It should use gcc-libs* instead.
+    cat superbuild/share/doc/copyright/gcc-libs-msys2.txt > superbuild/share/doc/copyright/gnustl-msys2.txt
     
-    type share\licenses\gcc-libs\README          >  superbuild\share\doc\copyright\gcc-libs-msys2.txt
-    echo ---                                     >> superbuild\share\doc\copyright\gcc-libs-msys2.txt
-    type share\licenses\gcc-libs\COPYING.RUNTIME >> superbuild\share\doc\copyright\gcc-libs-msys2.txt
-    REM Deprecation warning: Mapper still looks for gnustl*. It should use gcc-libs* instead.
-    type superbuild\share\doc\copyright\gcc-libs-msys2.txt > superbuild\share\doc\copyright\gnustl-msys2.txt
+    cat share/licenses/libwinpthread/mingw-w64-libraries/winpthreads/COPYING > superbuild/share/doc/copyright/winpthreads-msys2.txt
     
-    type share\licenses\libwinpthread\mingw-w64-libraries\winpthreads\COPYING > superbuild\share\doc\copyright\winpthreads-msys2.txt
-    
-    type share\licenses\libwinpthread\COPYING > superbuild\share\doc\copyright\mingw-w64-msys2.txt
+    cat share/licenses/libwinpthread/COPYING > superbuild/share/doc/copyright/mingw-w64-msys2.txt
+    END_CI
   displayName: 'Generate copyright files for toolchain libraries'
 
 - publish: $(MSYS2_INSTALL_DIR)
   artifact: MSYS2-$(MINGW)-base
   displayName: 'Publish MSYS2 base artifacts'
+  condition: false
 
-- script: |
-    if not exist mingw-source (
-      mkdir mingw-source
-    )
+- bash: |
+    ci/msys2bash.cmd -s << END_CI
+    mkdir -p mingw-source
     cd mingw-source
     
-    set LANG=C
-    pacman -Qo /%MINGW%/bin/libstdc++-6.dll ^
-      | sed "s,-gcc-libs,-gcc," ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," > urls.txt
-    pacman -Qo /%MINGW%/bin/libwinpthread-1.dll ^
-      | sed "s,-libwinpthread,-winpthreads," ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
-    pacman -Qo /%MINGW%/%MSYSTEM_CARCH%-w64-mingw32/include/windows.h ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
-    pacman -Qo /%MINGW%/bin/makensis.exe ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+    export LANG=C
+    pacman -Qo /\${MINGW}/bin/libstdc++-6.dll \
+      | sed "s,-gcc-libs,-gcc," \
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," > urls.txt
+    pacman -Qo /\${MINGW}/bin/libwinpthread-1.dll \
+      | sed "s,-libwinpthread,-winpthreads," \
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+    pacman -Qo /\${MINGW}/\${MSYSTEM_CARCH}-w64-mingw32/include/windows.h \
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+    pacman -Qo /\${MINGW}/bin/makensis.exe \
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
     
-    type urls.txt
-    wget --no-verbose -i urls.txt 2>&1
-    if errorlevel 1 (
-      echo ##vso[task.LogIssue type=warning]Failed to download some %MINGW% source tarballs.
-      exit /b 0
-    )
+    cat urls.txt
+    wget --no-verbose -i urls.txt 2>&1 \
+      || echo "##vso[task.LogIssue type=warning]Failed to download some $(MINGW) source tarballs."
+    END_CI
   displayName: 'Get extra source tarballs'
 
 - publish: $(Build.SourcesDirectory)\mingw-source
   artifact: MSYS2-$(MINGW)-source
   displayName: 'Publish MSYS2 source artifacts'
+
