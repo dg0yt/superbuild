@@ -54,10 +54,12 @@ steps:
 
 - bash: |
     ci/msys2bash.cmd -s << END_CI
+    set -x
     export PACMAN_ARCHIVE=`cygpath -m '$(PACMAN_ARCHIVE)'`
     mkdir -p "\${PACMAN_ARCHIVE}"
     echo -n "\${PACMAN_ARCHIVE}: "
     ls "\${PACMAN_ARCHIVE}"
+    ls /var/cache/pacman/pkg
     pacman --cachedir '$(PACMAN_ARCHIVE)' --noconfirm -Sy --needed \
       bison \
       diffutils \
@@ -79,6 +81,7 @@ steps:
       2>error.log || cat error.log
     echo "\${PACMAN_ARCHIVE}: "
     ls "\${PACMAN_ARCHIVE}"
+    ls /var/cache/pacman/pkg
     END_CI
   displayName: 'Install MSYS2 MinGW packages for OpenOrienteering Superbuild'
   
@@ -123,14 +126,14 @@ steps:
     MSYSTEM_CARCH=x86_64
     pacman -Qo /\${MINGW}/bin/libstdc++-6.dll \
       | sed "s,-gcc-libs,-gcc," \
-      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," > urls.txt
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," > urls.txt
     pacman -Qo /\${MINGW}/bin/libwinpthread-1.dll \
       | sed "s,-libwinpthread,-winpthreads," \
-      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
     pacman -Qo /\${MINGW}/\${MSYSTEM_CARCH}-w64-mingw32/include/windows.h \
-      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
     pacman -Qo /\${MINGW}/bin/makensis.exe \
-      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+      | sed "s,\.*owned by mingw-w64-\${MSYSTEM_CARCH},http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
     
     cat urls.txt
     wget --no-verbose -i urls.txt 2>&1 \
