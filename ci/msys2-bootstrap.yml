@@ -55,6 +55,7 @@ steps:
 - bash: |
     ci/msys2bash.cmd -s << END_CI
     export PACMAN_ARCHIVE=`cygpath -m '$(PACMAN_ARCHIVE)'`
+    mkdir -p "\${PACMAN_ARCHIVE}"
     echo -n "\${PACMAN_ARCHIVE}: "
     ls "\${PACMAN_ARCHIVE}"
     pacman --cachedir '$(PACMAN_ARCHIVE)' --noconfirm -Sy --needed \
