@@ -43,10 +43,10 @@ steps:
     echo \$SHELL
     ls -l \$SHELL
     for I in bash git cmake ninja gcc g++ clang clang++; do
-      echo -n "\$I:"
+      echo -n "\$I: "
       which \$I || true
     done
-    echo -n "/mingw64/bin:"
+    echo -n "/mingw64/bin: "
     cygpath -w /mingw64/bin
     env | sort
     END_CI
@@ -54,8 +54,9 @@ steps:
 
 - bash: |
     ci/msys2bash.cmd -s << END_CI
-    echo -n "$(PACMAN_ARCHIVE):"
-    ls '$(PACMAN_ARCHIVE)'
+    export PACMAN_ARCHIVE=`cygpath -m '$(PACMAN_ARCHIVE)'`
+    echo -n "\${PACMAN_ARCHIVE}: "
+    ls "\${PACMAN_ARCHIVE}"
     pacman --cachedir '$(PACMAN_ARCHIVE)' --noconfirm -Sy --needed \
       bison \
       diffutils \
@@ -75,14 +76,17 @@ steps:
       mingw-w64-{x86_64,i686}-tools-git  \
       mingw-w64-{x86_64,i686}-winpthreads-git \
       2>error.log || cat error.log
-    echo "$(PACMAN_ARCHIVE):" `ls $(PACMAN_ARCHIVE)`
+    echo "\${PACMAN_ARCHIVE}: "
+    ls "\${PACMAN_ARCHIVE}"
     END_CI
   displayName: 'Install MSYS2 MinGW packages for OpenOrienteering Superbuild'
   
 - bash: |
     ci/msys2bash.cmd -s << END_CI
-    pacman --cachedir '$(PACMAN_ARCHIVE)' --noconfirm -Scc
-    echo "$(PACMAN_ARCHIVE):" `ls $(PACMAN_ARCHIVE)`
+    export PACMAN_ARCHIVE=`cygpath -m '$(PACMAN_ARCHIVE)'`
+    pacman --cachedir "\${PACMAN_ARCHIVE}" --noconfirm -Scc
+    echo "\${PACMAN_ARCHIVE}: "
+    ls "\${PACMAN_ARCHIVE}"
     END_CI
   displayName: 'Reduce installation size for CI'
 
