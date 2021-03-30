@@ -33,7 +33,7 @@ variables:
   MSYSCON: defterm
   MSYSTEM: MSYS
   # PACMAN_ARCHIVE: '/var/cache/pacman/pkg'
-  PACMAN_ARCHIVE: '$(Pipeline.Workspace)/pacman-archive'
+  PACMAN_ARCHIVE: '$(Pipeline.Workspace)/MSYS2-pacman-archiv'
 pool:
   vmImage: 'windows-2019'
 
@@ -51,15 +51,14 @@ steps:
     env | sort
     END_CI
   displayName: Analyse environment
+  condition: false
 
 - bash: |
     ci/msys2bash.cmd -s << END_CI
+    set -e
     set -x
     export PACMAN_ARCHIVE=`cygpath -u '$(PACMAN_ARCHIVE)'`
-    mkdir -p "\${PACMAN_ARCHIVE}"
-    echo -n "\${PACMAN_ARCHIVE}: "
-    ls "\${PACMAN_ARCHIVE}"
-    ls /var/cache/pacman/pkg
+    mkdir "\${PACMAN_ARCHIVE}"
     pacman --verbose --cachedir "\${PACMAN_ARCHIVE}" --noconfirm -S --needed \
       bison \
       git \
@@ -82,20 +81,13 @@ steps:
       # mingw-w64-{x86_64,i686}-tools-git  \
       # mingw-w64-{x86_64,i686}-winpthreads-git \
       # ...
-    echo "\${PACMAN_ARCHIVE}: "
     ls "\${PACMAN_ARCHIVE}"
-    ls /var/cache/pacman/pkg
     END_CI
   displayName: 'Install MSYS2 MinGW packages for OpenOrienteering Superbuild'
   
-- bash: |
-    ci/msys2bash.cmd -s << END_CI
-    export PACMAN_ARCHIVE=`cygpath -u '$(PACMAN_ARCHIVE)'`
-    pacman --cachedir "\${PACMAN_ARCHIVE}" --noconfirm -Scc
-    echo "\${PACMAN_ARCHIVE}: "
-    ls "\${PACMAN_ARCHIVE}"
-    END_CI
-  displayName: 'Reduce installation size for CI'
+- publish: $(PACMAN_ARCHIVE)
+  artifact: MSYS2-pacman-archiv
+  displayName: 'Publish MSYS2 pacman archive'
 
 - bash: |
     ci/msys2bash.cmd -s << END_CI
@@ -114,10 +106,7 @@ steps:
     done
     END_CI
   displayName: 'Generate copyright files for toolchain libraries'
-
-- publish: $(PACMAN_ARCHIVE)
-  artifact: MSYS2-pacman-archiv
-  displayName: 'Publish MSYS2 pacman archive'
+  condition: false
 
 - bash: |
     ci/msys2bash.cmd -s << END_CI
@@ -129,14 +118,14 @@ steps:
     MSYSTEM_CARCH=x86_64
     pacman -Qo /\${MINGW}/bin/libstdc++-6.dll \
       | sed "s,-gcc-libs,-gcc," \
-      | sed "s,\\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," > urls.txt
+      | sed "s,^.*owned by mingw-w64-[^-]*,https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," > urls.txt
     pacman -Qo /\${MINGW}/bin/libwinpthread-1.dll \
       | sed "s,-libwinpthread,-winpthreads," \
-      | sed "s,\\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+      | sed "s,^.*owned by mingw-w64-[^-]*,https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
     pacman -Qo /\${MINGW}/\${MSYSTEM_CARCH}-w64-mingw32/include/windows.h \
-      | sed "s,\\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+      | sed "s,^.*owned by mingw-w64-[^-]*,https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
     pacman -Qo /\${MINGW}/bin/makensis.exe \
-      | sed "s,\\.*owned by mingw-w64-\${MSYSTEM_CARCH},https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
+      | sed "s,^.*owned by mingw-w64-[^-]*,https://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.gz," >> urls.txt
     
     cat urls.txt
     wget --no-verbose -i urls.txt 2>&1 \
