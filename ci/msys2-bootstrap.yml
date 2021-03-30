@@ -61,6 +61,7 @@ steps:
   displayName: Analyse environment
 
 - bash: |
+    export MSYSTEM=MSYS2
     ci/msys2bash.cmd -s << END_CI
     echo "$(PACMAN_ARCHIVE):" `ls '$(PACMAN_ARCHIVE)'`
     pacman --noconfirm -Sy --needed \
@@ -82,20 +83,22 @@ steps:
       mingw-w64-\${MSYSTEM_CARCH}-tools-git  \
       mingw-w64-\${MSYSTEM_CARCH}-winpthreads-git \
       2>error.log || cat error.log
-    echo "$(PACMAN_ARCHIVE):" `ls '$(PACMAN_ARCHIVE)'`
+    echo "$(PACMAN_ARCHIVE):" `ls $(PACMAN_ARCHIVE)`
     END_CI
   condition: not(variables['openorienteering.superbuild.msysBuildId'])
   displayName: 'Install MSYS2 MinGW packages for OpenOrienteering Superbuild'
   
 - bash: |
+    export MSYSTEM=MSYS2
     ci/msys2bash.cmd -s << END_CI
     pacman --noconfirm -Scc
-    echo "$(PACMAN_ARCHIVE):" `ls '$(PACMAN_ARCHIVE)'`
+    echo "$(PACMAN_ARCHIVE):" `ls $(PACMAN_ARCHIVE)`
     END_CI
   #condition: not(variables['openorienteering.superbuild.msysBuildId'])
   displayName: 'Reduce installation size for CI'
 
 - bash: |
+    export MSYSTEM=MSYS2
     ci/msys2bash.cmd -s << END_CI
     cd /${MINGW}
     mkdir -p superbuild/share/doc/copyright
@@ -117,6 +120,7 @@ steps:
   condition: false
 
 - bash: |
+    export MSYSTEM=MSYS2
     ci/msys2bash.cmd -s << END_CI
     mkdir -p mingw-source
     cd mingw-source
