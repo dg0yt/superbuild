@@ -60,25 +60,28 @@ steps:
     echo -n "\${PACMAN_ARCHIVE}: "
     ls "\${PACMAN_ARCHIVE}"
     ls /var/cache/pacman/pkg
-    pacman --cachedir '$(PACMAN_ARCHIVE)' --noconfirm -Sy --needed \
+    pacman --cachedir "\${PACMAN_ARCHIVE}" --noconfirm -Sy --needed \
       bison \
-      diffutils \
-      flex \
       git \
-      gzip \
-      make \
       ninja \
-      patch \
-      python \
       sharutils \
-      mingw-w64-{x86_64,i686}-binutils \
-      mingw-w64-{x86_64,i686}-cmake \
-      mingw-w64-{x86_64,i686}-gcc \
-      mingw-w64-{x86_64,i686}-headers-git \
       mingw-w64-{x86_64,i686}-nsis \
-      mingw-w64-{x86_64,i686}-tools-git  \
-      mingw-w64-{x86_64,i686}-winpthreads-git \
       2>error.log || cat error.log
+      # Already installed:
+      # diffutils \
+      # flex \
+      # gzip \
+      # make \
+      # patch \
+      # python \
+      # mingw-w64-{x86_64,i686}-binutils \
+      # mingw-w64-{x86_64,i686}-cmake \
+      # mingw-w64-{x86_64,i686}-gcc \
+      # mingw-w64-{x86_64,i686}-headers-git \
+      # mingw-w64-{x86_64,i686}-nsis \
+      # mingw-w64-{x86_64,i686}-tools-git  \
+      # mingw-w64-{x86_64,i686}-winpthreads-git \
+      # ...
     echo "\${PACMAN_ARCHIVE}: "
     ls "\${PACMAN_ARCHIVE}"
     ls /var/cache/pacman/pkg
