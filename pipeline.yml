@@ -1,0 +1,12 @@
+strategy:
+  matrix:
+    'from-image':
+      msys2bash: 'C:\shells\msys2bash.cmd'
+    'from-here':
+      msys2bash: '.\msys2bash.cmd'
+
+pool:
+  vmImage: 'windows-2019'
+steps:
+- script: '$(msys2bash) -c "echo $(msys2bash): success"'
+
