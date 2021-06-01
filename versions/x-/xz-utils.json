@@ -1,10 +1,9 @@
 {
-  "versions" : [
+  "versions": [
     {
-	"git-tree": "8b69ba176d822b6ec5c339d2b409146820d59cac",
+      "git-tree": "34a967847500a52b39ed23bdc4f4cbb5003cc4b4",
       "version-string": "5.2.4",
-      "port-version": 0,
-      "$path": "$/ports/xz-utils"
+      "port-version": 0
     }
   ]
 }

@@ -1,10 +1,9 @@
 {
-  "versions" : [
+  "versions": [
     {
-      "git-tree": "8b69ba176d822b6ec5c339d2b409146820d59cac",
-      "version-string": "1.12.11",
-      "port-version": 0,
-      "$path": "$/ports/zlib"
+      "git-tree": "527fc985ca534c2c5c0489b52d0ff71a376dad44",
+      "version": "1.12.11",
+      "port-version": 0
     }
   ]
 }
