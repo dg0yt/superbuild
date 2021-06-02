@@ -5,8 +5,8 @@
   },
   "@KIND_GIT@default-registry": {
 	"kind": "git",
-	"baseline": "@SOURCE_HEAD@",
-	"repository": "@SOURCE_DIR@/.."
+	"baseline": "@DPKG_PORTS_HEAD@",
+	"repository": "@DPKG_PORTS_PATH@"
   },
   "registries": [
     {

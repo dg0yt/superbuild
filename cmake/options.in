@@ -1,3 +1,4 @@
+--overlay-ports=@DPKG_PORTS_PATH@/ports
 --downloads-root=@OUTPUT_DIR@/downloads
 --x-buildtrees-root=@OUTPUT_DIR@/buildtrees
 --x-packages-root=@OUTPUT_DIR@/packages
