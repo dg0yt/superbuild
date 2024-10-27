@@ -671,6 +671,10 @@ elseif(APPLE)
     list(APPEND toolchain_info_var_system
       XCODE_VERSION
       CMAKE_OSX_SYSROOT
+      CMAKE_OSX_DEPLOYMENT_TARGET
+    )
+    list(APPEND env_vars
+      MACOSX_DEPLOYMENT_TARGET
     )
 endif()
 
