@@ -130,6 +130,26 @@ index dd3ebca4a65..ee7ac5c0143 100644
  class QIOSurfaceGraphicsBuffer : public QPlatformGraphicsBuffer
 ]])
 
+set(qtbase-qmake_patch [[
+diff --git a/qmake/library/ioutils.cpp b/qmake/library/ioutils.cpp
+index 3e49a99..09bdd51 100644
+--- a/qmake/library/ioutils.cpp
++++ b/qmake/library/ioutils.cpp
+@@ -50,7 +50,11 @@ using namespace QMakeInternal;
+ 
+ IoUtils::FileType IoUtils::fileType(const QString &fileName)
+ {
+-    Q_ASSERT(fileName.isEmpty() || isAbsolutePath(fileName));
++    if (!fileName.isEmpty()) {
++        if (!isAbsolutePath(fileName))
++            printf(stderr, "Unexpected call of IoUtils::fileType('%s')\n", fileName.toLatin1().constData());
++        Q_ASSERT(isAbsolutePath(fileName));
++    }
+ #ifdef Q_OS_WIN
+     DWORD attr = GetFileAttributesW((WCHAR*)fileName.utf16());
+     if (attr == INVALID_FILE_ATTRIBUTES)
+]])
+
 # copyright and patches for superbuild of Qt
 
 set(default        [[$<STREQUAL:${SYSTEM_NAME},default>]])
@@ -181,6 +201,7 @@ superbuild_package(
   SOURCE_WRITE
     gcc-13.patch    qtbase-gcc-13_patch
     qtbase-8467bed.patch  qtbase-8467bed_patch
+    qtbase-qmake.patch    qtbase-qmake_patch
   SOURCE
     URL             https://download.qt.io/archive/qt/${short_version}/${qtbase_version}/submodules/qtbase-everywhere-src-${qtbase_version}.tar.xz
     URL_HASH        SHA256=8088f174e6d28e779516c083b6087b6a9e3c8322b4bc161fd1b54195e3c86940
