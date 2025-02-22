@@ -181,13 +181,13 @@ superbuild_package(
   NAME           qtbase
   VERSION        ${short_version}
   DEPENDS
-    qtbase-everywhere-src-${qtbase_patch_version}+openorienteering2
+    qtbase-everywhere-src-${qtbase_patch_version}+openorienteering3
 )
 
 set(module Qt5Core)
 superbuild_package(
   NAME         qtbase-everywhere-src
-  VERSION      ${qtbase_patch_version}+openorienteering2
+  VERSION      ${qtbase_patch_version}+openorienteering3
   DEPENDS
     source:qt-${short_version}-openorienteering-${openorienteering_version}
     freetype
@@ -238,6 +238,8 @@ superbuild_package(
       patch -p1 < gcc-13.patch
     COMMAND
       patch -p1 < qtbase-8467bed.patch
+    COMMAND
+      patch -p1 < qtbase-qmake.patch
   
   USING default crosscompiling windows android macos USE_SYSTEM_QT module short_version openorienteering_version qtbase_patch_version
   BUILD_CONDITION  ${use_system_qt}
@@ -751,7 +753,7 @@ if(GIT_EXECUTABLE AND PYTHONINTERP_FOUND)
       DEPENDS
         qttools-qtattributionsscanner-${patch_version}
         source:qtandroidextras-everywhere-src-${patch_version}
-        source:qtbase-everywhere-src-${qtbase_patch_version}+openorienteering2
+        source:qtbase-everywhere-src-${qtbase_patch_version}+openorienteering3
         source:qtimageformats-everywhere-src-${patch_version}
         source:qtlocation-everywhere-src-${patch_version}
         source:qtsensors-everywhere-src-${patch_version}
