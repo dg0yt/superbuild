@@ -142,7 +142,7 @@ index 3e49a99..09bdd51 100644
 -    Q_ASSERT(fileName.isEmpty() || isAbsolutePath(fileName));
 +    if (!fileName.isEmpty()) {
 +        if (!isAbsolutePath(fileName))
-+            printf(stderr, "Unexpected call of IoUtils::fileType('%s')\n", fileName.toLatin1().constData());
++            fprintf(stderr, "Unexpected call of IoUtils::fileType('%s')\n", fileName.toLatin1().constData());
 +        Q_ASSERT(isAbsolutePath(fileName));
 +    }
  #ifdef Q_OS_WIN
