@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2019, 2024 Kai Pastor
+# Copyright 2019, 2024, 2025 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -36,7 +36,7 @@ steps:
     
     brew install texinfo
     
-    sudo xcode-select -s /Applications/Xcode_14.1.app/Contents/Developer
+    sudo xcode-select -s /Applications/Xcode_15.0.app/Contents/Developer
     xcode-select --print-path
 
     # - We target android-28 at the moment.
