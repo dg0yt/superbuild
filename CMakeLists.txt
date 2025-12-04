@@ -689,6 +689,7 @@ set(toolchain_info_var_build  "Variables that control the build"
 list(APPEND toolchain_info_groups toolchain_info_var_languages)
 set(toolchain_info_var_languages  "Variables for languages"
   CMAKE_C_COMPILER
+  CMAKE_C_COMPILER_ID
   CMAKE_C_COMPILER_VERSION
   CMAKE_C_FLAGS
   CMAKE_C_FLAGS_DEBUG
@@ -698,6 +699,7 @@ set(toolchain_info_var_languages  "Variables for languages"
   CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
   CMAKE_C_IMPLICIT_LINK_DIRECTORIES
   CMAKE_CXX_COMPILER
+  CMAKE_CXX_COMPILER_ID
   CMAKE_CXX_COMPILER_VERSION
   CMAKE_CXX_FLAGS
   CMAKE_CXX_FLAGS_DEBUG
