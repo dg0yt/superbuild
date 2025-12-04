@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2020, 2024 Kai Pastor
+# Copyright 2020, 2024, 2025 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -48,11 +48,15 @@ set(test_system_libkml [[
 	endif()
 	
 	if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-		set(extra_flags "-Wno-dangling-else -Wno-parentheses-equality" PARENT_SCOPE)
+		set(extra_flags " -Wno-dangling-else -Wno-parentheses-equality" PARENT_SCOPE)
 	else()
 		set(extra_flags "" PARENT_SCOPE)
 	endif()
 ]])
+
+set(project_include_cmake "
+string(APPEND CMAKE_C_FLAGS \" ${extra_flags}\")
+")
 
 set(strptime_c_sed [[
 /^if.WIN32./a \
@@ -144,6 +148,7 @@ superbuild_package(
     zlib
   
   SOURCE_WRITE
+    project-include.cmake project_include_cmake
     strptime_c.sed   strptime_c_sed
   SOURCE
     URL            ${base_url}libkml_${version}.orig.tar.gz
@@ -168,13 +173,13 @@ superbuild_package(
         cmake/External_uriparser.cmake
         cmake/External_zlib.cmake
   
-  USING            USE_SYSTEM_LIBKML patch_version extra_flags
+  USING            USE_SYSTEM_LIBKML patch_version
   BUILD_CONDITION  ${test_system_libkml}
   BUILD [[
     CMAKE_ARGS
       "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
       "-DCMAKE_BUILD_TYPE:STRING=$<CONFIG>"
-      "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS} ${extra_flags}"
+      "-DCMAKE_PROJECT_INCLUDE=<SOURCE_DIR>/project-include.cmake"
       -DBUILD_SHARED_LIBS=ON
       -DBoost_FOUND=ON
 #      $<$<NOT:$<BOOL:@CMAKE_CROSSCOMPILING@>>:
