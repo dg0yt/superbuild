@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2020 Kai Pastor
+# Copyright 2020, 2025 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -47,6 +47,10 @@ set(test_system_boost [[
 			endif()
 		endif()
 	endif()
+
+  separate_arguments(cxxflags UNIX_COMMAND "${CMAKE_CXX_FLAGS}")
+  list(TRANSFORM cxxflags PREPEND "cxxflags=")
+  set(extra_flags "${cxxflags}" PARENT_SCOPE)
 ]])
 
 superbuild_package(
@@ -73,7 +77,7 @@ superbuild_package(
         -Dpackage=boost1.71-patches-${patch_version}
         -P "${APPLY_PATCHES_SERIES}"
   
-  USING            USE_SYSTEM_BOOST patch_version
+  USING            USE_SYSTEM_BOOST patch_version extra_flags
   BUILD_CONDITION  ${test_system_boost}
   BUILD [[
     # Cannot do out-of-source build of boost
@@ -86,9 +90,9 @@ superbuild_package(
     COMMAND
       sh ./bootstrap.sh --without-icu --prefix=${DESTDIR}${CMAKE_STAGING_PREFIX}
     COMMAND
-      ./b2 tools/bcp
+      ./b2 ${extra_flags} tools/bcp
     COMMAND
-      ./b2 --with-headers
+      ./b2 ${extra_flags} --with-headers
     INSTALL_COMMAND
       ""
   ]]
