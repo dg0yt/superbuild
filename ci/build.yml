@@ -46,6 +46,9 @@ steps:
     echo "##vso[task.setVariable variable=CMAKE_WRAPPING]${CMAKE_WRAPPING:=-E env bash ${BUILD_SOURCESDIRECTORY}/ci/shell.sh ${CMAKE:-cmake}}"
     echo "##vso[task.setVariable variable=TARGET_SUFFIX]${TARGET_SUFFIX}"
     echo "##vso[task.setVariable variable=CTEST_OUTPUT_ON_FAILURE]1"
+    WARNING_CFLAGS="-Wno-deprecated-declarations -Wno-invalid-source-encoding -Wno-maybe-uninitalized -Wno-unknown-warning-option -Wno-unused-variable"
+    echo "##vso[task.setvariable variable=CFLAGS]${CFLAGS:+${CFLAGS} }${WARNING_CFLAGS:+${WARNING_CFLAGS} }-Wno-old-style-definition"
+    echo "##vso[task.setvariable variable=CXXFLAGS]${CXXFLAGS:+${CXXFLAGS} }${WARNING_CFLAGS}"
     env
   displayName: 'Update environment'
 
