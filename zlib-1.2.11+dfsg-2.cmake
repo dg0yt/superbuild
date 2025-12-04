@@ -132,9 +132,11 @@ set(test_system_minizip [[
 
 string(CONCAT CMakeLists_txt [[
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 
 project(minizip C)
+
+string(APPEND CMAKE_C_FLAGS " ${EXTRA_CFLAGS}")
 
 find_package(ZLIB CONFIG QUIET)
 find_package(ZLIB MODULE QUIET)
@@ -193,7 +195,7 @@ superbuild_package(
     CMAKE_ARGS
       "-DMINIZIP_SOURCE_DIR=<SOURCE_DIR>/../zlib-${patch_version}/contrib/minizip"
       "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-      "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS} ${extra_flags}"
+      "-DEXTRA_CFLAGS=${extra_flags}"
       "-DCMAKE_BUILD_TYPE:STRING=$<CONFIG>"
       -DBUILD_SHARED_LIBS=ON
    INSTALL_COMMAND
