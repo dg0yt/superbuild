@@ -115,7 +115,7 @@ jobs:
 
 
 - job: Android_armv7
-  condition: and(succeeded(), contains('^Android_armv7$', '${{ parameters.jobPattern }}'))
+  condition: and(contains('${{ parameters.jobPattern }}','Android'), succeeded(), contains('^Android_armv7$', '${{ parameters.jobPattern }}'))
   timeoutInMinutes: 180
   dependsOn: Android_aarch64
   variables:
@@ -175,9 +175,9 @@ jobs:
     - template: publish.yml
 
 - job: Android_x86
-  condition: and(succeeded(), contains('^Android_x86$', '${{ parameters.jobPattern }}'))
+  condition: and(contains('${{ parameters.jobPattern }}','Android'), succeeded(), contains('^Android_x86$', '${{ parameters.jobPattern }}'))
   timeoutInMinutes: 180
-  dependsOn: Source
+  dependsOn: Android_x86_64
   variables:
     IMAGE_NAME: 'macOS-14'
     SUPERBUILD_INSTALL_DIR: $(HOME)/superbuild
@@ -205,9 +205,9 @@ jobs:
     - template: publish.yml
 
 - job: Android_x86_64
-  condition: and(succeeded(), contains('^Android_x86_64$', '${{ parameters.jobPattern }}'))
+  condition: and(contains('${{ parameters.jobPattern }}','Android'), succeeded(), contains('^Android_x86_64$', '${{ parameters.jobPattern }}'))
   timeoutInMinutes: 180
-  dependsOn: Android_x86
+  dependsOn: Source
   variables:
     IMAGE_NAME: 'macOS-14'
     SUPERBUILD_INSTALL_DIR: $(HOME)/superbuild
