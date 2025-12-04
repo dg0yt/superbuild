@@ -71,7 +71,7 @@ jobs:
 - job: Linux
   condition: and(succeeded(), contains('^Linux$', '${{ parameters.jobPattern }}'))
   timeoutInMinutes: 120
-  dependsOn: macOS
+  dependsOn: Source
   variables:
     IMAGE_NAME: 'ubuntu-22.04'
     SUPERBUILD_INSTALL_DIR: $(HOME)/superbuild
