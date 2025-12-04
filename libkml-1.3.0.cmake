@@ -48,9 +48,9 @@ set(test_system_libkml [[
 	endif()
 	
 	if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-		set(extra_flags " -Wno-dangling-else -Wno-parentheses-equality" PARENT_SCOPE)
+		set(extra_flags "-Wno-dangling-else -Wno-parentheses-equality" PARENT_SCOPE)
 	else()
-		set(extra_flags "" PARENT_SCOPE)
+		set(extra_flags "-Wno-maybe-uninitialized -Wno-uninitialized" PARENT_SCOPE)
 	endif()
 ]])
 
