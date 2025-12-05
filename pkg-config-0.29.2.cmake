@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2020 Kai Pastor
+# Copyright 2020, 2025 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -90,7 +90,7 @@ superbuild_package(
         "--prefix=${TOOLCHAIN_DIR}"
         "--with-internal-glib"
         "--disable-host-tool"
-        "CFLAGS=${extra_flags}"
+        "CFLAGS=${SUPERBUILD_CFLAGS} ${extra_flags}"
     INSTALL_COMMAND
       "$(MAKE)" install "DESTDIR=${DESTDIR}"
     COMMAND
