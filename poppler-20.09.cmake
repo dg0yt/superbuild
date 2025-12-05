@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2020 Kai Pastor
+# Copyright 2020, 2025 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -66,6 +66,10 @@ set(test_system_poppler [[
 	endif()
 ]])
 
+set(project_include_cmake "
+string(APPEND CMAKE_C_FLAGS \" ${extra_flags}\")
+")
+
 superbuild_package(
   NAME           poppler-patches
   VERSION        ${patch_version}
@@ -89,6 +93,8 @@ superbuild_package(
     tiff
     zlib
   
+  SOURCE_WRITE
+    project-include.cmake project_include_cmake
   SOURCE
     URL            ${base_url}poppler_${version}.orig.tar.xz
     URL_HASH       ${download_hash}
@@ -97,12 +103,12 @@ superbuild_package(
         -Dpackage=poppler-patches-${patch_version}
         -P "${APPLY_PATCHES_SERIES}"
   
-  USING            USE_SYSTEM_POPPLER patch_version extra_flags
+  USING            USE_SYSTEM_POPPLER patch_version
   BUILD_CONDITION  ${test_system_poppler}
   BUILD [[
     CMAKE_ARGS
       "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-      "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} ${extra_flags}"
+      "-DCMAKE_PROJECT_INCLUDE=<SOURCE_DIR>/project-include.cmake"
       "-DCMAKE_BUILD_TYPE:STRING=$<CONFIG>"
       -DBUILD_SHARED_LIBS=ON
       -DENABLE_UNSTABLE_API_ABI_HEADERS=ON # needed by GDAL
