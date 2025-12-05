@@ -46,17 +46,7 @@ set(test_system_libkml [[
 			set(BUILD_CONDITION 0)
 		endif()
 	endif()
-	
-	if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-		set(extra_flags "-Wno-dangling-else -Wno-parentheses-equality" PARENT_SCOPE)
-	else()
-		set(extra_flags "-Wno-maybe-uninitialized -Wno-uninitialized" PARENT_SCOPE)
-	endif()
 ]])
-
-set(project_include_cmake "
-string(APPEND CMAKE_C_FLAGS \" ${extra_flags}\")
-")
 
 set(strptime_c_sed [[
 /^if.WIN32./a \
@@ -148,7 +138,6 @@ superbuild_package(
     zlib
   
   SOURCE_WRITE
-    project-include.cmake project_include_cmake
     strptime_c.sed   strptime_c_sed
   SOURCE
     URL            ${base_url}libkml_${version}.orig.tar.gz
@@ -159,6 +148,8 @@ superbuild_package(
         -P "${APPLY_PATCHES_SERIES}"
     COMMAND
       sed -e "s/ZLIB 1.2.8/ZLIB 1.2.7/" -i -- CMakeLists.txt
+    COMMAND
+      sed -e "s/-Wall -Wextra -Wno-unused-parameter -pedantic//" -i -- CMakeLists.txt
     COMMAND
       patch -p1 < "<DOWNLOAD_DIR>/libkml-${version}-mingw.patch"
     COMMAND
@@ -179,7 +170,6 @@ superbuild_package(
     CMAKE_ARGS
       "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
       "-DCMAKE_BUILD_TYPE:STRING=$<CONFIG>"
-      "-DCMAKE_PROJECT_INCLUDE=<SOURCE_DIR>/project-include.cmake"
       -DBUILD_SHARED_LIBS=ON
       -DBoost_FOUND=ON
 #      $<$<NOT:$<BOOL:@CMAKE_CROSSCOMPILING@>>:
