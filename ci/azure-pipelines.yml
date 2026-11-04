@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2019-2025 Kai Pastor
+# Copyright 2019-2026 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -31,7 +31,7 @@ parameters:
   - name: jobPattern
     displayName: 'Enable jobs which contain this substring'
     type: string
-    default: '^'
+    default: '^Windows'
 
 jobs:
 - job: Source
@@ -275,6 +275,40 @@ jobs:
   variables:
     IMAGE_NAME: 'windows-2022'
     MINGW: mingw64
+    SUPERBUILD_INSTALL_DIR: 'C:/msys2'
+    SUPERBUILD_INSTALL_DIR_NATIVE: 'C:\msys2'
+    VERBOSE: 1
+  pool:
+    vmImage: '$(IMAGE_NAME)'
+  steps:
+    - template: setup-msys2.yml
+    - template: build.yml
+      parameters:
+        cmakeArgs: >
+          -G "MSYS Makefiles"
+          -Ddefault_INSTALL_DIR=
+          -Ddefault_INSTALL_PREFIX=$(SUPERBUILD_INSTALL_DIR)/$(MINGW)/superbuild
+          -Ddefault_TOOLCHAIN_DIR=$(SUPERBUILD_INSTALL_DIR)/$(MINGW)/toolchain
+          -Ddefault_PREFIX_PATH=$(SUPERBUILD_INSTALL_DIR)/$(MINGW)/superbuild
+          -DUSE_SYSTEM_CURL=OFF
+          -DUSE_SYSTEM_EXPAT=OFF
+          -DUSE_SYSTEM_LIBICONV=OFF
+          -DUSE_SYSTEM_LZMA=OFF
+          -DUSE_SYSTEM_SQLITE3=OFF
+          -DUSE_SYSTEM_ZLIB=OFF
+          -DMapper_GIT_GDAL_DATA_DIR=$(SUPERBUILD_INSTALL_DIR)/$(MINGW)/superbuild/share/gdal
+          -DSUPERBUILD_DOWNLOAD_DIR=../download
+    - template: publish.yml
+      parameters:
+        outputSuffix: -$(MINGW)
+
+- job: Windows_ucrt64
+  condition: and(succeeded(), contains('^Windows_ucrt64$', '${{ parameters.jobPattern }}'))
+  timeoutInMinutes: 240
+  dependsOn: Source
+  variables:
+    IMAGE_NAME: 'windows-2022'
+    MINGW: ucrt64
     SUPERBUILD_INSTALL_DIR: 'C:/msys2'
     SUPERBUILD_INSTALL_DIR_NATIVE: 'C:\msys2'
     VERBOSE: 1

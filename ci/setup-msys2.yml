@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2019, 2020, 2024 Kai Pastor
+# Copyright 2019, 2020, 2024, 2026 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -36,6 +36,9 @@ steps:
     if msys-%MINGW%==msys-mingw32 (
       echo ##vso[task.setVariable variable=MSYSTEM]MINGW32
       echo ##vso[task.setVariable variable=MSYSTEM_CARCH]i686
+    ) else if msys-%MINGW%==msys-ucrt64 (
+      echo ##vso[task.setVariable variable=MSYSTEM]UCRT64
+      echo ##vso[task.setVariable variable=MSYSTEM_CARCH]x86_64
     ) else (
       echo ##vso[task.setVariable variable=MSYSTEM]MINGW64
       echo ##vso[task.setVariable variable=MSYSTEM_CARCH]x86_64
@@ -86,11 +89,11 @@ steps:
       mingw-w64-%MSYSTEM_CARCH%-gcc ^
       mingw-w64-%MSYSTEM_CARCH%-headers-git ^
       mingw-w64-%MSYSTEM_CARCH%-nasm ^
-      mingw-w64-%MSYSTEM_CARCH%-nsis ^
       mingw-w64-%MSYSTEM_CARCH%-pkgconf ^
       mingw-w64-%MSYSTEM_CARCH%-python ^
-      mingw-w64-%MSYSTEM_CARCH%-tools-git  ^
       mingw-w64-%MSYSTEM_CARCH%-winpthreads-git ^
+      mingw-w64-ucrt64-nsis ^
+      mingw-w64-ucrt64-tools-git  ^
       2>error.log
     if errorlevel 1 (
       type error.log 1>&2
