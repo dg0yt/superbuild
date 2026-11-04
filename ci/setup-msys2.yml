@@ -36,12 +36,15 @@ steps:
     if msys-%MINGW%==msys-mingw32 (
       echo ##vso[task.setVariable variable=MSYSTEM]MINGW32
       echo ##vso[task.setVariable variable=MSYSTEM_CARCH]i686
+      echo ##vso[task.setVariable variable=MSYSTEM_CRT]
     ) else if msys-%MINGW%==msys-ucrt64 (
       echo ##vso[task.setVariable variable=MSYSTEM]UCRT64
       echo ##vso[task.setVariable variable=MSYSTEM_CARCH]x86_64
+      echo ##vso[task.setVariable variable=MSYSTEM_CRT]ucrt-
     ) else (
       echo ##vso[task.setVariable variable=MSYSTEM]MINGW64
       echo ##vso[task.setVariable variable=MSYSTEM_CARCH]x86_64
+      echo ##vso[task.setVariable variable=MSYSTEM_CRT]
     )
   displayName: 'Setup MSYS2 environment variables'
 
@@ -85,15 +88,15 @@ steps:
       make ^
       patch ^
       sharutils ^
-      mingw-w64-%MSYSTEM_CARCH%-binutils ^
-      mingw-w64-%MSYSTEM_CARCH%-gcc ^
-      mingw-w64-%MSYSTEM_CARCH%-headers-git ^
-      mingw-w64-%MSYSTEM_CARCH%-nasm ^
-      mingw-w64-%MSYSTEM_CARCH%-pkgconf ^
-      mingw-w64-%MSYSTEM_CARCH%-python ^
-      mingw-w64-%MSYSTEM_CARCH%-winpthreads-git ^
-      mingw-w64-ucrt64-nsis ^
-      mingw-w64-ucrt64-tools-git  ^
+      mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%-binutils ^
+      mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%-gcc ^
+      mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%-headers-git ^
+      mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%-nasm ^
+      mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%-pkgconf ^
+      mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%-python ^
+      mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%-winpthreads-git ^
+      mingw-w64-ucrt-x86_64-nsis ^
+      mingw-w64-ucrt-x86_64-tools-git  ^
       2>error.log
     if errorlevel 1 (
       type error.log 1>&2
@@ -150,14 +153,14 @@ steps:
     set PATH=%SUPERBUILD_INSTALL_DIR_NATIVE%\usr\bin;%WINDIR%\system32;%WINDIR%;%WINDIR%\system32\wbem
     pacman -Qo /%MINGW%/bin/libstdc++-6.dll ^
       | sed "s,-gcc-libs,-gcc," ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," > urls.txt
+      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," > urls.txt
     pacman -Qo /%MINGW%/bin/libwinpthread-1.dll ^
       | sed "s,-libwinpthread,-winpthreads," ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," >> urls.txt
+      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," >> urls.txt
     pacman -Qo /%MINGW%/include/windows.h ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," >> urls.txt
+      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," >> urls.txt
     pacman -Qo /%MINGW%/bin/makensis.exe ^
-      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," >> urls.txt
+      | sed "s,^.*owned by mingw-w64-%MSYSTEM_CRT%%MSYSTEM_CARCH%,http://repo.msys2.org/mingw/sources/mingw-w64,;s, ,-,;s, *$,.src.tar.zst," >> urls.txt
     
     type urls.txt
     wget --no-verbose -i urls.txt 2>&1
