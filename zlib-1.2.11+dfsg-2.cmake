@@ -65,6 +65,23 @@ set(test_system_zlib [[
 	endif()
 ]])
 
+set(disable-winrt.diff [[
+diff --git a/contrib/minizip/iowin32.c b/contrib/minizip/iowin32.c
+index 274f39e..0e30001 100644
+--- a/contrib/minizip/iowin32.c
++++ b/contrib/minizip/iowin32.c
+@@ -28,9 +28,6 @@
+ 
+ // see Include/shared/winapifamily.h in the Windows Kit
+ #if defined(WINAPI_FAMILY_PARTITION) && (!(defined(IOWIN32_USING_WINRT_API)))
+-#if WINAPI_FAMILY_ONE_PARTITION(WINAPI_FAMILY, WINAPI_PARTITION_APP)
+-#define IOWIN32_USING_WINRT_API 1
+-#endif
+ #endif
+ 
+ voidpf  ZCALLBACK win32_open_file_func  OF((voidpf opaque, const char* filename, int mode));
+ ]])
+
 superbuild_package(
   NAME           zlib-patches
   VERSION        ${patch_version}
@@ -79,7 +96,9 @@ superbuild_package(
   VERSION        ${patch_version}
   DEPENDS
     source:zlib-patches-${patch_version}
-  
+
+  SOURCE_WRITE
+    disable-winrt.diff disable-winrt.diff
   SOURCE
     URL            ${base_url}/libz-mingw-w64_${version}.orig.tar.xz
     URL_HASH       ${download_hash}
@@ -91,6 +110,8 @@ superbuild_package(
       ${CMAKE_COMMAND} -E
         echo "set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)"
           >> "<SOURCE_DIR>/CMakeLists.txt"
+    COMMAND
+      patch -p1 < disable-winrt.diff
   
   USING            USE_SYSTEM_ZLIB patch_version
   BUILD_CONDITION  ${test_system_zlib}
