@@ -56,13 +56,32 @@ set(test_system_libiconv [[
 	endif()
 ]])
 
+set(loop_wchar_diff [[
+diff --git a/lib/loop_wchar.h b/lib/loop_wchar.h
+index cc19d83..829f3e2 100644
+--- a/lib/loop_wchar.h
++++ b/lib/loop_wchar.h
+@@ -36,7 +36,6 @@
+ # include <wchar.h>
+ # define BUF_SIZE 64  /* assume MB_LEN_MAX <= 64 */
+   /* Some systems, like BeOS, have multibyte encodings but lack mbstate_t.  */
+-  extern size_t mbrtowc ();
+ # ifdef mbstate_t
+ #  define mbrtowc(pwc, s, n, ps) (mbrtowc)(pwc, s, n, 0)
+ #  define mbsinit(ps) 1
+]])
+
 superbuild_package(
   NAME           libiconv
-  VERSION        ${patch_version}
+  VERSION        ${patch_version}+openorienteering1
   
+  SOURCE_WRITE
+    loop_wchar.diff  loop_wchar_diff
   SOURCE
     URL            ${base_url}/libiconv-${version}.tar.gz
     URL_HASH       ${download_hash}
+  PATCH_COMMAND
+    patch -p1 < loop_wchar.diff
   
   USING
     USE_SYSTEM_LIBICONV
