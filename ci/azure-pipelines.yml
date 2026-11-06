@@ -312,6 +312,8 @@ jobs:
     SUPERBUILD_INSTALL_DIR: 'C:/msys2'
     SUPERBUILD_INSTALL_DIR_NATIVE: 'C:\msys2'
     VERBOSE: 1
+    # https://github.com/msys2/MINGW-packages/issues/8425
+    CFLAGS: -D__MSVCRT_VERSION__=0x0E00
   pool:
     vmImage: '$(IMAGE_NAME)'
   steps:
