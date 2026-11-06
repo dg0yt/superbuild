@@ -96,6 +96,9 @@ superbuild_package(
     COMMAND
       # MSYS2 on Windows doesn't handle symlinks well.
       sed -i -e "s, AND NOT MSYS,," CMakeLists.txt
+    COMMAND
+      # No <fp.h> with XCode 16.4
+      sed -i -e "s,include <fp.h>,include <math.h>," pngpriv.h
   
   USING            USE_SYSTEM_LIBPNG patch_version extra_flags
   BUILD_CONDITION  ${test_system_png}
