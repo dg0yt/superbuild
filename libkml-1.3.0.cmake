@@ -1,6 +1,6 @@
 # This file is part of OpenOrienteering.
 
-# Copyright 2020, 2024 Kai Pastor
+# Copyright 2020, 2024, 2026 Kai Pastor
 #
 # Redistribution and use is allowed according to the terms of the BSD license:
 #
@@ -123,9 +123,9 @@ superbuild_package(
   VERSION        ${version}
   
   SOURCE
-    URL            https://raw.githubusercontent.com/msys2/MINGW-packages/d5535441b7435a0e7a7d7dee83b175eae7b48475/mingw-w64-libkml/strptime.c
-    URL_HASH       SHA256=49433be91643aaccef032ded7d413782a6ed62f545883165814e13c0e1f4182c
-    DOWNLOAD_NAME  libkml-${version}-strptime.c
+    URL            https://raw.githubusercontent.com/msys2/MINGW-packages/5fc86ab103a4a8b4f7e75353a43fd1f13ce5add7/mingw-w64-libkml/strptime.c
+    URL_HASH       SHA256=51407d4eb29717586409169fcce1571e2f17277f70946c2d443a6e1cc32d44c8
+    DOWNLOAD_NAME  libkml-${version}-5fc86ab-strptime.c
     DOWNLOAD_NO_EXTRACT 1
 )
 
@@ -157,7 +157,7 @@ superbuild_package(
     COMMAND
       patch -p1 < "<DOWNLOAD_DIR>/libkml-${version}-mingw.patch"
     COMMAND
-      "${CMAKE_COMMAND}" -E copy "<DOWNLOAD_DIR>/libkml-${version}-strptime.c" "src/kml/base/contrib/netbsd-strptime.c"
+      "${CMAKE_COMMAND}" -E copy "<DOWNLOAD_DIR>/libkml-${version}-5fc86ab-strptime.c" "src/kml/base/contrib/netbsd-strptime.c"
     COMMAND
       sed -f strptime_c.sed -i -- src/kml/base/CMakeLists.txt
     COMMAND
