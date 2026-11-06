@@ -130,6 +130,8 @@ superbuild_package(
         -P "${APPLY_PATCHES_SERIES}"
     COMMAND
       patch -p1 < gcc-13.patch
+    COMMAND
+      sed -e "s/#include <windows.h>/#include <cstdint>\\n#include <windows.h>/" -i -- src/filemanager.cpp
     
   USING            USE_SYSTEM_PROJ patch_version
   BUILD_CONDITION  ${test_system_proj}
