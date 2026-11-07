@@ -31,7 +31,7 @@ parameters:
   - name: jobPattern
     displayName: 'Enable jobs which contain this substring'
     type: string
-    default: '^macOS'
+    default: 'a'
 
 jobs:
 - job: Source
@@ -47,6 +47,33 @@ jobs:
   dependsOn: Source
   variables:
     IMAGE_NAME: 'macOS-15'
+    MACOSX_DEPLOYMENT_TARGET: 11.7
+    SUPERBUILD_INSTALL_DIR: $(HOME)/superbuild
+    QT_STYLE_OVERRIDE: fusion
+  pool:
+    vmImage: '$(IMAGE_NAME)'
+  steps:
+    - template: setup-macos.yml
+    - template: build.yml
+      parameters:
+        cmakeArgs: >
+          "-DCMAKE_PREFIX_PATH=$(SUPERBUILD_INSTALL_DIR)\;/usr/local/opt/bison;/usr"
+          -DCMAKE_FIND_FRAMEWORK=LAST
+          -DCMAKE_FIND_APPBUNDLE=LAST
+          -DUSE_SYSTEM_OPENJPEG=OFF
+          -DUSE_SYSTEM_LZMA=OFF
+          -DUSE_SYSTEM_SQLITE3=OFF
+          -DMapper_GIT_GDAL_DATA_DIR=$(SUPERBUILD_INSTALL_DIR)/share/gdal
+        buildArgs: -j5
+    - template: publish.yml
+
+
+- job: macOS_14
+  condition: and(succeeded(), contains('^macOS$', '${{ parameters.jobPattern }}'))
+  timeoutInMinutes: 180
+  dependsOn: Source
+  variables:
+    IMAGE_NAME: 'macOS-14'
     MACOSX_DEPLOYMENT_TARGET: 11.7
     SUPERBUILD_INSTALL_DIR: $(HOME)/superbuild
     QT_STYLE_OVERRIDE: fusion
