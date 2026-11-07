@@ -216,6 +216,15 @@ superbuild_package(
       patch -p1 < libjpeg.patch
     COMMAND
       patch -p1 < gcc-13.patch
+    # Actually the same as https://github.com/OSGeo/gdal/pull/15077
+    COMMAND
+      mv ogr/ogrsf_frmts/cad/libopencad/dwg/io.h ogr/ogrsf_frmts/cad/libopencad/dwg/dwg_io.h
+    COMMAND
+      sed -e s,io[.]h,dwg_io.h, -i -- ogr/ogrsf_frmts/cad/libopencad/dwg/io.cpp
+    COMMAND
+      sed -e s,io[.]h,dwg_io.h, -i -- ogr/ogrsf_frmts/cad/libopencad/dwg/r2000.h
+    COMMAND
+      sed -e s,io[.]h,dwg_io.h, -i -- ogr/ogrsf_frmts/cad/libopencad/cadheader.cpp
   
   USING            USE_SYSTEM_GDAL patch_version extra_cflags extra_cxxflags extra_ldflags
   BUILD_CONDITION  ${test_system_gdal}
