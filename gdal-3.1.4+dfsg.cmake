@@ -83,10 +83,11 @@ diff --git a/ogr/ogrsf_frmts/cad/libopencad/dwg/r2000.cpp b/ogr/ogrsf_frmts/cad/
 index b500df8..51666e3 100644
 --- a/ogr/ogrsf_frmts/cad/libopencad/dwg/r2000.cpp
 +++ b/ogr/ogrsf_frmts/cad/libopencad/dwg/r2000.cpp
-@@ -36,6 +36,7 @@
+@@ -36,6 +36,8 @@
  #include <cassert>
  #include <cstring>
  #include <iostream>
++#include <cstdint>
 +#include <limits>
  #include <memory>
  #include <string>
