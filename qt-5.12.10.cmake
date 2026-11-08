@@ -283,6 +283,7 @@ superbuild_package(
       $<$<CONFIG:Debug>:-debug>$<$<NOT:$<CONFIG:Debug>>:-release $<$<CONFIG:RelWithDebInfo>:-force-debug-info>>
       -shared
       -optimized-tools
+      -c++std c++14
       $<@macos@:-no-framework>
       -gui
       -widgets
